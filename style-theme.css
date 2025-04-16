@@ -1,17 +1,20 @@
-
 body.light {
   background-color: #f8f9fa;
   color: #212529;
 }
-body.light .navbar { background-color: #ffffff !important; }
+body.light .navbar {
+  background-color: #ffffff !important;
+}
 
 body.dark {
   background-color: #121212;
   color: #f1f1f1;
 }
-body.dark .navbar { background-color: #1f1f1f !important; }
+body.dark .navbar {
+  background-color: #1f1f1f !important;
+}
 body.dark .btn {
-  color: #ffffff !important;
+  color: #198754 !important;
   background-color: #2c2c2c;
   border-color: #888;
 }
@@ -25,4 +28,7 @@ body.minimal {
   background-color: #ffffff;
   color: #111;
 }
-body.minimal .navbar { background: none !important; box-shadow: none !important; }
+body.minimal .navbar {
+  background: none !important;
+  box-shadow: none !important;
+}
