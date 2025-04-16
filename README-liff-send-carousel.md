@@ -1,0 +1,1 @@
+ส่ง Carousel Flex ด้วย liff.sendMessages() จากหลายข่าวที่เลือก
