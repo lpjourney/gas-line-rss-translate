@@ -1,1 +1,1 @@
-ฝัง day.js และระบบแสดงวันที่อัจฉริยะแล้ว ใช้งานผ่าน https://news.watsaitama.com
+✅ อัปเดตเรียบร้อย: ใช้ day.js พร้อม timezone fix แล้ว
