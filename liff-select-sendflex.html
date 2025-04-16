@@ -2,7 +2,7 @@
 <html lang="th">
   <head>
     <meta charset="UTF-8" />
-    <title>📢 ส่ง Flex ผ่าน LIFF</title>
+    <title>📢 ส่ง Flex ผ่าน LIFF ID</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
@@ -165,9 +165,7 @@
         };
 
         try {
-          await liff.init({
-            liffId: "1661018679-7JYB8QQ1",
-          }); /* liff-select-sendflex */
+          await liff.init({ liffId: "1661018679-7JYB8QQ1" });
           await liff.sendMessages([flexMsg]);
           document.getElementById("status").textContent =
             "✅ ส่งผ่าน LIFF สำเร็จแล้ว!";
