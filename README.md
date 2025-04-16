@@ -1,1 +1,1 @@
-✅ อัปเดตเรียบร้อย: ใช้ day.js พร้อม timezone fix แล้ว
+✅ รวมทุกไฟล์พร้อม header menu และธีม: index.html, liff-news.html, header.html, style-theme.css

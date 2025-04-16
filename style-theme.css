@@ -1,0 +1,19 @@
+
+body.light {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+body.light .navbar { background-color: #ffffff !important; }
+
+body.dark {
+  background-color: #121212;
+  color: #f1f1f1;
+}
+body.dark .navbar { background-color: #1f1f1f !important; }
+body.dark .btn { border-color: #aaa; color: #eee; }
+
+body.minimal {
+  background-color: #ffffff;
+  color: #111;
+}
+body.minimal .navbar { background: none !important; box-shadow: none !important; }
