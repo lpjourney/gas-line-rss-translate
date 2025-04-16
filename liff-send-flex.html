@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>LIFF: ส่งข่าวล่าสุด</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    button { padding: 12px 20px; margin-top: 20px; font-size: 1rem; }
+    #status { margin-top: 15px; font-weight: bold; }
+    .preview { border: 1px solid #ccc; padding: 15px; margin-top: 15px; background: #f9f9f9; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h2>📢 ส่งข่าวล่าสุดไปยังกลุ่ม LINE</h2>
+  <div class="preview" id="flexPreview">กำลังโหลดตัวอย่าง...</div>
+  <button onclick="sendFlex()">🚀 ส่ง Flex ทันที</button>
+  <div id="status"></div>
+
+  <script>
+    const apiUrl = "https://script.google.com/macros/s/AKfycbzIeh-8ONQAbklb1yYDlOpiME28qL44LFeySxiRIrY6Py5YFEwCPeYhqYM3QujdShYbYw/exec";
+
+    async function sendFlex() {
+      document.getElementById("status").textContent = "⏳ กำลังส่ง...";
+      try {
+        const res = await fetch(apiUrl, { method: "POST" });
+        const text = await res.text();
+        document.getElementById("status").textContent = text.includes("✅") ? text : "❌ ส่งไม่สำเร็จ: " + text;
+      } catch (err) {
+        document.getElementById("status").textContent = "⚠️ เกิดข้อผิดพลาดในการส่ง";
+        console.error(err);
+      }
+    }
+
+    async function previewFlex() {
+      try {
+        const res = await fetch(apiUrl + "?preview=1");
+        const msg = await res.text();
+        document.getElementById("flexPreview").textContent = msg;
+      } catch (e) {
+        document.getElementById("flexPreview").textContent = "❌ ไม่สามารถโหลดพรีวิวได้";
+      }
+    }
+
+    previewFlex();
+  </script>
+</body>
+</html>
