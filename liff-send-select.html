@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>📢 เลือกข่าวเพื่อส่ง Flex</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 700px; margin: auto; }
+    select, button { padding: 10px; font-size: 1rem; width: 100%; margin-top: 10px; }
+    .card-preview { margin-top: 20px; border: 1px solid #ccc; border-radius: 6px; background: #f9f9f9; padding: 15px; }
+    .card-preview img { max-width: 100%; border-radius: 6px; margin-bottom: 10px; }
+    .flex-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; }
+    .flex-content { font-size: 0.95rem; color: #333; }
+    #status { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>📢 เลือกข่าวเพื่อส่ง Flex ไปยัง LINE</h2>
+
+  <select id="newsSelect">
+    <option disabled selected>🔍 กรุณาเลือกข่าว...</option>
+  </select>
+
+  <div class="card-preview" id="previewBox" style="display:none;">
+    <img id="previewImage" src="" alt="Preview Image">
+    <div class="flex-title" id="previewTitle"></div>
+    <div class="flex-content" id="previewContent"></div>
+    <button disabled>📎 ปุ่ม Flex (จำลอง)</button>
+  </div>
+
+  <button onclick="sendFlex()" id="sendBtn" style="display:none;">🚀 ส่ง Flex ตอนนี้</button>
+
+  <div id="status"></div>
+
+  <script>
+    const api = "https://script.google.com/macros/s/AKfycbzIeh-8ONQAbklb1yYDlOpiME28qL44LFeySxiRIrY6Py5YFEwCPeYhqYM3QujdShYbYw/exec";
+    let newsData = [];
+
+    async function fetchNews() {
+      const res = await fetch(api + "?preview=1");
+      newsData = await res.json();
+
+      const sel = document.getElementById("newsSelect");
+      newsData.forEach((item, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = item.translated.slice(0, 100) + "...";
+        sel.appendChild(option);
+      });
+
+      sel.onchange = function () {
+        const i = parseInt(this.value);
+        const item = newsData[i];
+
+        document.getElementById("previewTitle").textContent = item.title;
+        document.getElementById("previewContent").textContent = item.translated;
+        document.getElementById("previewImage").src = item.image || "https://your-default-image.com/default.jpg";
+        document.getElementById("previewBox").style.display = "block";
+        document.getElementById("sendBtn").style.display = "block";
+      };
+    }
+
+    async function sendFlex() {
+      const selectedIndex = document.getElementById("newsSelect").value;
+      if (selectedIndex === "" || selectedIndex === undefined) return;
+
+      const item = newsData[selectedIndex];
+      const res = await fetch(api, {
+        method: "POST",
+        body: JSON.stringify({ link: item.link }),
+        headers: { "Content-Type": "application/json" }
+      });
+      const text = await res.text();
+      document.getElementById("status").textContent = text;
+    }
+
+    fetchNews();
+  </script>
+</body>
+</html>
