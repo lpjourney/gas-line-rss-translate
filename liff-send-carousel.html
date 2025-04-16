@@ -2,46 +2,73 @@
 <html lang="th">
   <head>
     <meta charset="UTF-8" />
-    <title>📢 ส่ง Carousel Flex ผ่าน LIFF</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>📢 ส่ง Carousel Flex ผ่าน LIFF</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
       body {
-        font-family: sans-serif;
+        font-family: "Segoe UI", sans-serif;
+        background: #f5f5f5;
         padding: 20px;
-        max-width: 800px;
         margin: auto;
+        max-width: 800px;
       }
-      .news-item {
-        border: 1px solid #ccc;
-        padding: 10px;
-        margin-top: 10px;
-        border-radius: 6px;
-        background: #f9f9f9;
+      h2 {
+        color: #2c7a7b;
       }
-      .news-item input {
-        margin-right: 10px;
+      .news-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 20px;
       }
-      .news-item img {
+      .news-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+      }
+      .news-card label {
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+      }
+      .news-card img {
+        margin-top: 8px;
+        border-radius: 8px;
         max-width: 100%;
-        border-radius: 4px;
-        margin-top: 5px;
+        object-fit: cover;
+      }
+      .news-title {
+        font-weight: bold;
+        font-size: 1.05rem;
+        margin-bottom: 4px;
+      }
+      .news-desc {
+        color: #555;
+        font-size: 0.9rem;
       }
       button {
-        margin-top: 20px;
+        margin-top: 25px;
         padding: 12px;
-        font-size: 1rem;
-        width: 100%;
+        font-size: 1.05rem;
+        border: none;
+        background: #2f855a;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
       }
       #status {
-        margin-top: 15px;
+        margin-top: 20px;
         font-weight: bold;
       }
     </style>
   </head>
   <body>
-    <h2>📢 เลือกหลายข่าว → ส่ง Carousel Flex ผ่าน LIFF</h2>
-    <div id="newsList">กำลังโหลดข่าว...</div>
+    <h2>📢 เลือกหลายข่าว → ส่ง Flex แบบ Carousel</h2>
+    <div id="newsList" class="news-list">⏳ กำลังโหลดข่าว...</div>
     <button onclick="sendCarousel()">🚀 ส่ง Carousel Flex</button>
     <div id="status"></div>
 
@@ -52,29 +79,30 @@
       async function fetchNews() {
         const res = await fetch(api + "?preview=1");
         newsData = await res.json();
-        const container = document.getElementById("newsList");
-        container.innerHTML = "";
+        const list = document.getElementById("newsList");
+        list.innerHTML = "";
 
         newsData.forEach((item, i) => {
           const box = document.createElement("div");
-          box.className = "news-item";
+          box.className = "news-card";
           box.innerHTML = \`
             <label>
-              <input type="checkbox" value="\${i}">
-              <strong>\${item.title}</strong><br>
-              <small>\${item.translated.slice(0, 100)}...</small><br>
-              <img src="\${item.image || 'https://png.pngtree.com/thumb_back/fh260/background/20231108/pngtree-japanese-style-2024-year-of-the-dragon-new-year-background-image_13958021.jpg'}">
+              <input type="checkbox" value="\${i}" />
+              <div class="news-title">\${item.title}</div>
+              <div class="news-desc">\${item.translated.slice(0, 100)}...</div>
+              <img src="\${item.image || 'https://your-default-image.com/default.jpg'}" alt="Preview" />
             </label>
           \`;
-          container.appendChild(box);
+          list.appendChild(box);
         });
       }
 
       async function sendCarousel() {
-        const selected = [...document.querySelectorAll("input[type='checkbox']:checked")].map(c => newsData[c.value]);
+        const selected = [...document.querySelectorAll("input[type='checkbox']:checked")]
+                          .map(cb => newsData[cb.value]);
 
         if (selected.length === 0) {
-          document.getElementById("status").textContent = "⚠️ กรุณาเลือกอย่างน้อย 1 ข่าว";
+          document.getElementById("status").textContent = "⚠️ กรุณาเลือกข่าวอย่างน้อย 1 รายการ";
           return;
         }
 
@@ -82,7 +110,7 @@
           type: "bubble",
           hero: {
             type: "image",
-            url: item.image || "https://png.pngtree.com/thumb_back/fh260/background/20231108/pngtree-japanese-style-2024-year-of-the-dragon-new-year-background-image_13958021.jpg",
+            url: item.image || "https://your-default-image.com/default.jpg",
             size: "full",
             aspectRatio: "16:9",
             aspectMode: "cover"
@@ -116,16 +144,13 @@
         const carouselFlex = {
           type: "flex",
           altText: "📢 ข่าวล่าสุดจากอำเภอ",
-          contents: {
-            type: "carousel",
-            contents: bubbles
-          }
+          contents: { type: "carousel", contents: bubbles }
         };
 
         try {
-          await liff.init({ liffId: "1661018679-erv7N44z" });
+          await liff.init({ liffId: "YOUR_LIFF_ID_HERE" });
           await liff.sendMessages([carouselFlex]);
-          document.getElementById("status").textContent = "✅ ส่ง Carousel Flex สำเร็จแล้ว";
+          document.getElementById("status").textContent = "✅ ส่ง Flex สำเร็จแล้ว!";
           liff.closeWindow();
         } catch (err) {
           console.error(err);
