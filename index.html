@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ข่าวจากอำเภอ - แปลไทย</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-light text-dark">
+    <div class="container py-4">
+      <h1 class="mb-4 text-success">📢 ข่าวแปลภาษาไทยจากอำเภอ</h1>
+      <div id="newsList" class="row g-4"></div>
+    </div>
+
+    <script>
+      const API_URL =
+        "https://script.google.com/macros/s/1bLDcUjiLZ1_3s6YnxO2KDRbuE2jbLoGdHlTqRgDmtmaAbUBURwvsqB-T/exec";
+
+      fetch(API_URL)
+        .then((res) => res.json())
+        .then((data) => {
+          const list = document.getElementById("newsList");
+          if (data.length === 0) {
+            list.innerHTML = "<p>ไม่พบข่าวล่าสุด</p>";
+            return;
+          }
+
+          data.forEach((news) => {
+            const card = document.createElement("div");
+            card.className = "col-md-6";
+
+            card.innerHTML = `
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title text-success">${news.title}</h5>
+                <p class="card-text">${news.translated}</p>
+              </div>
+              <div class="card-footer d-flex justify-content-between align-items-center">
+                <small class="text-muted">🗓 ${news.pubDate}</small>
+                <a href="liff-news.html?id=${encodeURIComponent(
+                  news.link
+                )}" class="btn btn-sm btn-outline-success">อ่านภาษาไทย</a>
+              </div>
+            </div>
+          `;
+
+            list.appendChild(card);
+          });
+        })
+        .catch((err) => {
+          document.getElementById("newsList").innerHTML =
+            "<p class='text-danger'>เกิดข้อผิดพลาดในการโหลดข่าว</p>";
+          console.error(err);
+        });
+    </script>
+  </body>
+</html>
