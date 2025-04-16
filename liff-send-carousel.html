@@ -1,164 +1,175 @@
+
 <!DOCTYPE html>
 <html lang="th">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>📢 ส่ง Carousel Flex ผ่าน LIFF</title>
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <style>
-      body {
-        font-family: "Segoe UI", sans-serif;
-        background: #f5f5f5;
-        padding: 20px;
-        margin: auto;
-        max-width: 800px;
-      }
-      h2 {
-        color: #2c7a7b;
-      }
-      .news-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 20px;
-      }
-      .news-card {
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-      }
-      .news-card label {
-        display: flex;
-        flex-direction: column;
-        cursor: pointer;
-      }
-      .news-card img {
-        margin-top: 8px;
-        border-radius: 8px;
-        max-width: 100%;
-        object-fit: cover;
-      }
-      .news-title {
-        font-weight: bold;
-        font-size: 1.05rem;
-        margin-bottom: 4px;
-      }
-      .news-desc {
-        color: #555;
-        font-size: 0.9rem;
-      }
-      button {
-        margin-top: 25px;
-        padding: 12px;
-        font-size: 1.05rem;
-        border: none;
-        background: #2f855a;
-        color: white;
-        border-radius: 6px;
-        cursor: pointer;
-      }
-      #status {
-        margin-top: 20px;
-        font-weight: bold;
-      }
-    </style>
-  </head>
-  <body>
-    <h2>📢 เลือกหลายข่าว → ส่ง Flex แบบ Carousel</h2>
-    <div id="newsList" class="news-list">⏳ กำลังโหลดข่าว...</div>
-    <button onclick="sendCarousel()">🚀 ส่ง Carousel Flex</button>
-    <div id="status"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>📢 ส่ง Carousel Flex ผ่าน LIFF</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+      margin: auto;
+      max-width: 800px;
+    }
+    h2 {
+      color: #2c7a7b;
+    }
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .news-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+    .news-card input {
+      margin-right: 8px;
+    }
+    .news-card img {
+      margin-top: 8px;
+      border-radius: 8px;
+      max-width: 100%;
+      object-fit: cover;
+    }
+    .news-title {
+      font-weight: bold;
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+    .news-desc {
+      color: #555;
+      font-size: 0.9rem;
+    }
+    button {
+      margin-top: 25px;
+      padding: 12px;
+      font-size: 1.05rem;
+      border: none;
+      background: #2f855a;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>📢 เลือกหลายข่าว → ส่ง Flex แบบ Carousel</h2>
+  <div id="newsList" class="news-list">⏳ กำลังโหลดข่าว...</div>
+  <button onclick="sendCarousel()">🚀 ส่ง Carousel Flex</button>
+  <div id="status"></div>
 
-    <script>
-      const api = "https://script.google.com/macros/s/AKfycbzIeh-8ONQAbklb1yYDlOpiME28qL44LFeySxiRIrY6Py5YFEwCPeYhqYM3QujdShYbYw/exec";
-      let newsData = [];
+  <script>
+    const api = "https://script.google.com/macros/s/AKfycbzIeh-8ONQAbklb1yYDlOpiME28qL44LFeySxiRIrY6Py5YFEwCPeYhqYM3QujdShYbYw/exec";
+    let newsData = [];
 
-      async function fetchNews() {
-        const res = await fetch(api + "?preview=1");
-        newsData = await res.json();
-        const list = document.getElementById("newsList");
-        list.innerHTML = "";
+    async function fetchNews() {
+      const res = await fetch(api + "?preview=1");
+      newsData = await res.json();
+      const list = document.getElementById("newsList");
+      list.innerHTML = "";
 
-        newsData.forEach((item, i) => {
-          const box = document.createElement("div");
-          box.className = "news-card";
-          box.innerHTML = \`
-            <label>
-              <input type="checkbox" value="\${i}" />
-              <div class="news-title">\${item.title}</div>
-              <div class="news-desc">\${item.translated.slice(0, 100)}...</div>
-              <img src="\${item.image || 'https://your-default-image.com/default.jpg'}" alt="Preview" />
-            </label>
-          \`;
-          list.appendChild(box);
-        });
+      newsData.forEach((item, i) => {
+        const box = document.createElement("div");
+        box.className = "news-card";
+        const label = document.createElement("label");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = i;
+
+        const title = document.createElement("div");
+        title.className = "news-title";
+        title.textContent = item.title;
+
+        const desc = document.createElement("div");
+        desc.className = "news-desc";
+        desc.textContent = item.translated.slice(0, 100) + "...";
+
+        const img = document.createElement("img");
+        img.src = item.image || "https://your-default-image.com/default.jpg";
+
+        label.appendChild(checkbox);
+        label.appendChild(title);
+        label.appendChild(desc);
+        label.appendChild(img);
+        box.appendChild(label);
+        list.appendChild(box);
+      });
+    }
+
+    window.sendCarousel = async function () {
+      const selected = [...document.querySelectorAll("input[type='checkbox']:checked")].map(cb => newsData[cb.value]);
+      if (selected.length === 0) {
+        document.getElementById("status").textContent = "⚠️ กรุณาเลือกข่าวอย่างน้อย 1 รายการ";
+        return;
       }
 
-      async function sendCarousel() {
-        const selected = [...document.querySelectorAll("input[type='checkbox']:checked")]
-                          .map(cb => newsData[cb.value]);
-
-        if (selected.length === 0) {
-          document.getElementById("status").textContent = "⚠️ กรุณาเลือกข่าวอย่างน้อย 1 รายการ";
-          return;
-        }
-
-        const bubbles = selected.slice(0, 10).map(item => ({
-          type: "bubble",
-          hero: {
-            type: "image",
-            url: item.image || "https://your-default-image.com/default.jpg",
-            size: "full",
-            aspectRatio: "16:9",
-            aspectMode: "cover"
-          },
-          body: {
-            type: "box",
-            layout: "vertical",
-            contents: [
-              { type: "text", text: item.title, weight: "bold", size: "md", wrap: true },
-              { type: "text", text: item.translated.slice(0, 450), size: "sm", wrap: true, margin: "md" }
-            ]
-          },
-          footer: {
-            type: "box",
-            layout: "horizontal",
-            contents: [
-              {
-                type: "button",
-                style: "primary",
-                height: "sm",
-                action: {
-                  type: "uri",
-                  label: "📖 อ่าน",
-                  uri: "https://news.watsaitama.com/liff-news.html?id=" + encodeURIComponent(item.link)
-                }
+      const bubbles = selected.slice(0, 10).map(item => ({
+        type: "bubble",
+        hero: {
+          type: "image",
+          url: item.image || "https://your-default-image.com/default.jpg",
+          size: "full",
+          aspectRatio: "16:9",
+          aspectMode: "cover"
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          contents: [
+            { type: "text", text: item.title, weight: "bold", size: "md", wrap: true },
+            { type: "text", text: item.translated.slice(0, 450), size: "sm", wrap: true, margin: "md" }
+          ]
+        },
+        footer: {
+          type: "box",
+          layout: "horizontal",
+          contents: [
+            {
+              type: "button",
+              style: "primary",
+              height: "sm",
+              action: {
+                type: "uri",
+                label: "📖 อ่าน",
+                uri: "https://news.watsaitama.com/liff-news.html?id=" + encodeURIComponent(item.link)
               }
-            ]
-          }
-        }));
-
-        const carouselFlex = {
-          type: "flex",
-          altText: "📢 ข่าวล่าสุดจากอำเภอ",
-          contents: { type: "carousel", contents: bubbles }
-        };
-
-        try {
-          await liff.init({ liffId: "YOUR_LIFF_ID_HERE" });
-          await liff.sendMessages([carouselFlex]);
-          document.getElementById("status").textContent = "✅ ส่ง Flex สำเร็จแล้ว!";
-          liff.closeWindow();
-        } catch (err) {
-          console.error(err);
-          document.getElementById("status").textContent = "❌ ส่งไม่สำเร็จ: " + err.message;
+            }
+          ]
         }
-      }
+      }));
 
-      fetchNews();
-    </script>
-  </body>
+      const flexMsg = {
+        type: "flex",
+        altText: "📢 ข่าวจากอำเภอ",
+        contents: { type: "carousel", contents: bubbles }
+      };
+
+      try {
+        await liff.init({ liffId: "1661018679-erv7N44z" });
+        await liff.sendMessages([flexMsg]);
+        document.getElementById("status").textContent = "✅ ส่งสำเร็จแล้ว!";
+        liff.closeWindow();
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").textContent = "❌ ส่งไม่สำเร็จ: " + err.message;
+      }
+    };
+
+    fetchNews();
+  </script>
+</body>
 </html>
