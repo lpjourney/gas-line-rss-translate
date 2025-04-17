@@ -1,7 +1,23 @@
-/* news-horizontal.css */
+/* ==============================
+   📁 news-horizontal.css
+   สำหรับใช้เฉพาะกับ news-horizontal.html เท่านั้น
+   ============================== */
+
+/* 💡 โครงสร้างพื้นฐาน */
+.news-horizontal {
+  --thumb-size: 150px;
+  --card-radius: 0.75rem;
+  --thumb-radius: 0.5rem;
+  --gap: 1.5rem;
+}
+
 .news-horizontal .card {
-  border-radius: 0.75rem;
+  border-radius: var(--card-radius);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
 }
 
 .news-horizontal .card-body {
@@ -14,27 +30,60 @@
   padding: 0.5rem 1rem 1rem 1rem;
 }
 
-/* รูป thumbnail 1:1 แบบ responsive */
+/* 📷 Thumbnail Image */
 .news-horizontal .news-thumb-wrapper {
-  max-width: 150px;
+  width: var(--thumb-size);
+  max-width: 100%;
 }
 
 .news-horizontal .news-thumb-wrapper .ratio {
-  border-radius: 0.5rem;
+  border-radius: var(--thumb-radius);
   overflow: hidden;
+  background-color: #f8f9fa;
 }
 
 .news-horizontal .news-thumb-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background-color: #f8f9fa;
   display: block;
+  background-color: #eaeaea;
 }
 
-/* รองรับ responsive layout - ซ่อน thumbnail บนอุปกรณ์เล็ก */
-@media (max-width: 575.98px) {
-  .news-horizontal .news-thumb-wrapper {
-    display: none;
+/* 📱 Responsive Layout */
+@media (min-width: 768px) {
+  .news-horizontal .card-body .row {
+    flex-wrap: nowrap;
+    align-items: stretch;
   }
+
+  .news-horizontal .news-thumb-wrapper {
+    flex-shrink: 0;
+  }
+
+  .news-horizontal .card {
+    flex-direction: row;
+    gap: var(--gap);
+  }
+
+  .news-horizontal .card-body {
+    flex: 1;
+  }
+
+  .news-horizontal .col {
+    padding-left: 0;
+  }
+}
+
+/* 🖼️ เพิ่ม placeholder แบบ fallback ในกรณีโหลดภาพไม่ขึ้น */
+.news-horizontal img:before {
+  content: "📷";
+  display: inline-block;
+  background: #ddd;
+  text-align: center;
+}
+
+/* ✅ ป้องกันการทับกับ style ทั่วไป */
+body.news-horizontal-page .card {
+  margin-bottom: 1rem;
 }
