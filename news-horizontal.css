@@ -1,0 +1,40 @@
+/* news-horizontal.css */
+.news-horizontal .card {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.news-horizontal .card-body {
+  padding: 1rem 1rem 0.5rem 1rem;
+}
+
+.news-horizontal .card-footer {
+  background-color: transparent;
+  border-top: none;
+  padding: 0.5rem 1rem 1rem 1rem;
+}
+
+/* รูป thumbnail 1:1 แบบ responsive */
+.news-horizontal .news-thumb-wrapper {
+  max-width: 150px;
+}
+
+.news-horizontal .news-thumb-wrapper .ratio {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.news-horizontal .news-thumb-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: #f8f9fa;
+  display: block;
+}
+
+/* รองรับ responsive layout - ซ่อน thumbnail บนอุปกรณ์เล็ก */
+@media (max-width: 575.98px) {
+  .news-horizontal .news-thumb-wrapper {
+    display: none;
+  }
+}
