@@ -60,20 +60,18 @@
       <!-- Card Preview -->
       <div id="previewCardContainer"></div>
 
-      <!-- Toggle Button for Full Image -->
+      <!-- Controls -->
       <button id="toggleImageSize" class="btn btn-secondary btn-full">
         รูปเต็มสัดส่วน
       </button>
-
       <button id="shareButton" class="btn btn-success btn-full">
         📤 แชร์ Flex Message
       </button>
-
       <button id="testLogButton" class="btn btn-outline-primary btn-full">
         🧪 ทดสอบระบบบันทึก log (ไม่ส่ง Flex)
       </button>
 
-      <!-- Footer for webhook version & credit -->
+      <!-- Footer: version and credit -->
       <div id="footerVersion" class="version-footer"></div>
       <div class="version-footer">
         Developed by
@@ -86,35 +84,159 @@
     <script>
       const webhookUrl =
         "https://script.google.com/macros/s/AKfycbxCkj-3cM9tSU_IWosWOlGX3FZJqojmRxz3h_hyoqCP0n62k_1_pjhr1BZwis_2zW5L/exec";
+
+      // Full Flex Message JSON
       const flexMessage = {
-        /* ... existing JSON ... */
+        type: "flex",
+        altText: "แชร์ข่าวบุญ พิธีทอดผ้าป่าฉลองครบ 16 ปี วัดพระธรรมกายไซตะมะ",
+        contents: {
+          type: "bubble",
+          hero: {
+            type: "image",
+            url: "https://voom-obs.line-scdn.net/r/myhome/hex/cj02cG5vbWlnMzM4MTA1JnM9anA3JnQ9ZCZ1PTFlcGY5YzBkMDNpMDAmaT0w/m612x918",
+            size: "full",
+            aspectRatio: "1:1.4",
+            aspectMode: "cover",
+            backgroundColor: "#FFFFFFFF",
+            action: {
+              type: "uri",
+              label: "อ่านเพิ่มเติม",
+              uri: "https://linevoom.line.me/post/1172735114495047902",
+            },
+          },
+          body: {
+            type: "box",
+            layout: "vertical",
+            backgroundColor: "#FFFDEEFF",
+            contents: [
+              {
+                type: "text",
+                text: "พิธีทอดผ้าป่าฉลองครบ 16 ปี",
+                weight: "bold",
+                size: "lg",
+                color: "#C92041FF",
+                align: "center",
+              },
+              {
+                type: "text",
+                text: "วัดพระธรรมกายไซตะมะ",
+                size: "lg",
+                color: "#C92041FF",
+                align: "center",
+              },
+              {
+                type: "box",
+                layout: "vertical",
+                spacing: "sm",
+                margin: "lg",
+                contents: [
+                  {
+                    type: "box",
+                    layout: "baseline",
+                    spacing: "sm",
+                    contents: [
+                      {
+                        type: "text",
+                        text: "📍",
+                        size: "sm",
+                        flex: 1,
+                        color: "#888888",
+                      },
+                      {
+                        type: "text",
+                        text: "269-2 Nishimotojuku, Higashimatsuyama, Saitama",
+                        size: "sm",
+                        color: "#2C54D3FF",
+                        flex: 10,
+                        wrap: true,
+                      },
+                    ],
+                  },
+                  {
+                    type: "box",
+                    layout: "baseline",
+                    spacing: "sm",
+                    contents: [
+                      {
+                        type: "text",
+                        text: "🕥",
+                        size: "sm",
+                        flex: 1,
+                        color: "#888888",
+                      },
+                      {
+                        type: "text",
+                        text: "10:00 - 15:00",
+                        size: "sm",
+                        color: "#0E128CFF",
+                        flex: 10,
+                        wrap: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          footer: {
+            type: "box",
+            layout: "vertical",
+            spacing: "sm",
+            contents: [
+              {
+                type: "button",
+                action: {
+                  type: "uri",
+                  label: "อ่านเพิ่มเติม",
+                  uri: "https://linevoom.line.me/post/1172735114495047902",
+                },
+                style: "primary",
+              },
+              {
+                type: "button",
+                action: {
+                  type: "uri",
+                  label: "แชร์ข่าวบุญ",
+                  uri: "https://liff.line.me/1661018679-3gpyeQQk",
+                },
+                color: "#FF8B3DFF",
+                style: "primary",
+              },
+              { type: "spacer", size: "sm" },
+            ],
+          },
+        },
       };
 
+      // Render preview card
       function renderPreview(msg) {
         const container = document.getElementById("previewCardContainer");
         const heroUrl = msg.contents.hero.url;
-        const title1 = msg.contents.body.contents[0].text;
-        const title2 = msg.contents.body.contents[1].text;
+        const [title1, title2] = [
+          msg.contents.body.contents[0].text,
+          msg.contents.body.contents[1].text,
+        ];
         const infoItems = msg.contents.body.contents[2].contents
           .map(
             (item) =>
-              `<li class=\"list-group-item\">${item.contents[0].text} ${item.contents[1].text}</li>`
+              `<li class="list-group-item">${item.contents[0].text} ${item.contents[1].text}</li>`
           )
           .join("");
         container.innerHTML = `
-          <div class=\"card mb-3\">
-            <img src=\"${heroUrl}\" class=\"card-img-top\" alt=\"hero\" />
-            <div class=\"card-body\">
-              <h5 class=\"card-title\">${title1}</h5>
-              <h6 class=\"card-subtitle mb-2 text-muted\">${title2}</h6>
+          <div class="card mb-3">
+            <img src="${heroUrl}" class="card-img-top" alt="hero" />
+            <div class="card-body">
+              <h5 class="card-title">${title1}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">${title2}</h6>
             </div>
-            <ul class=\"list-group list-group-flush\">
+            <ul class="list-group list-group-flush">
               ${infoItems}
             </ul>
           </div>
         `;
       }
 
+      // Fetch webhook version via GET
       async function fetchVersion() {
         try {
           const res = await fetch(webhookUrl);
@@ -129,6 +251,7 @@
         }
       }
 
+      // Log share status to sheet
       async function logShareToSheet(status) {
         try {
           const profile = await liff.getProfile();
@@ -147,6 +270,7 @@
         }
       }
 
+      // Main entry
       async function main() {
         await liff.init({ liffId: "1661018679-Y47yR00l" });
         if (!liff.isLoggedIn()) {
@@ -158,7 +282,7 @@
         renderPreview(flexMessage);
         fetchVersion();
 
-        // Toggle image size
+        // Toggle image height
         let limited = true;
         document
           .getElementById("toggleImageSize")
@@ -175,6 +299,7 @@
               : "จำกัดความสูง 250px";
           });
 
+        // Share flex
         document.getElementById("shareButton").onclick = async () => {
           try {
             const result = await liff.shareTargetPicker([flexMessage]);
@@ -186,6 +311,7 @@
           }
         };
 
+        // Test log
         document.getElementById("testLogButton").onclick = async () => {
           await logShareToSheet("🧪 ทดสอบการบันทึก log");
           alert("✅ ส่งข้อมูลทดสอบไปยัง Google Sheet แล้ว");
