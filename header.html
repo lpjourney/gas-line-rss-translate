@@ -1,58 +1,219 @@
-<nav class="navbar navbar-expand-lg bg-light shadow-sm mb-4">
-  <div class="container">
-    <a class="navbar-brand fw-bold text-success" href="index.html">ข่าวอำเภอ</a>
-    <div class="d-flex align-items-center">
-      <a class="btn btn-sm btn-outline-success me-2" href="index.html"
-        >หน้าแรก</a
-      >
-      <a
-        class="btn btn-sm btn-outline-secondary me-2"
-        href="liff-send-carousel.html"
-        >ส่งข่าว</a
-      >
-      <a
-        class="btn btn-sm btn-outline-secondary me-2"
-        href="liff-select-sendflex.html"
-        >flex card</a
-      >
-      <a class="btn btn-sm btn-outline-secondary me-2" href="line-profile.html"
-        >LINE Profile</a
-      >
-      <a class="btn btn-sm btn-outline-secondary me-2" href="#">เกี่ยวกับ</a>
-      <select
-        id="themeSwitcher"
-        class="form-select form-select-sm me-3"
-        style="width: auto"
-      >
-        <option value="light" selected>🌞 Light</option>
-        <option value="dark">🌙 Dark</option>
-        <option value="minimal">🧘 Minimal</option>
-      </select>
-      <div
-        id="profileArea"
-        class="d-flex align-items-center"
-        style="display: none"
-      >
-        <img
-          id="profileImage"
-          src=""
-          alt=""
-          class="rounded-circle me-2"
-          style="width: 32px; height: 32px; object-fit: cover"
-        />
-        <span id="profileName" class="fw-semibold text-success small"></span>
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>📢 แชร์ข่าวผ่าน LINE</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+      body {
+        background: #f7f7f7;
+      }
+      .news-image {
+        width: 100%;
+        max-height: 300px;
+        object-fit: cover;
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container py-4">
+      <h1 class="text-success mb-4">📢 แชร์ข่าวภาษาไทย</h1>
+      <div id="newsContainer" class="card shadow-sm" style="display: none">
+        <img id="newsImage" class="news-image" src="" alt="" />
+        <div class="card-body">
+          <h5 id="newsTitle" class="fw-bold text-success"></h5>
+          <p id="newsContent" class="fs-5"></p>
+          <div class="text-muted mt-4" id="newsDate"></div>
+          <div class="d-flex justify-content-between mt-3">
+            <a
+              id="originalLink"
+              href="#"
+              target="_blank"
+              class="btn btn-outline-secondary btn-sm"
+              >🔗 อ่านต้นฉบับ</a
+            >
+            <button id="shareBtn" class="btn btn-outline-danger btn-sm">
+              📤 ส่ง LINE Flex
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="errorMsg" class="text-danger fw-semibold"></div>
+      <div id="loadingMsg" class="text-muted">⏳ กำลังโหลดข่าว...</div>
+    </div>
+
+    <!-- Modal Flex -->
+    <div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">แชร์ผ่าน LINE</h5>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p><strong>หัวข้อ:</strong> <span id="modalTitle"></span></p>
+            <p><strong>เนื้อหา:</strong> <span id="modalContent"></span></p>
+            <p><strong>ลิงก์:</strong> <span id="modalLink"></span></p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-success" id="modalSendBtn">
+              📤 แชร์ผ่าน LINE
+            </button>
+            <button class="btn btn-secondary" data-bs-dismiss="modal">
+              ปิด
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</nav>
 
-<script>
-  const profile = JSON.parse(localStorage.getItem("lineProfile"));
-  if (profile) {
-    document.getElementById("profileImage").src = profile.pictureUrl;
-    document.getElementById("profileName").textContent = profile.displayName;
-    document.getElementById("profileArea").style.display = "flex";
-  } else {
-    window.location.href = "line-profile.html";
-  }
-</script>
+    <script>
+      const sheetApiUrl =
+        "https://script.google.com/macros/s/AKfycbw7HEHW_mrgBUD-L1ogKs7r6XbbdenH6UwuS6W8XhUVeTeHci0gKW3IAOJ080YMc7PjGw/exec";
+      const fallbackImage =
+        "https://png.pngtree.com/thumb_back/fh260/background/20231108/pngtree-japanese-style-2024-year-of-the-dragon-new-year-background-image_13958021.jpg";
+
+      const urlParams = new URLSearchParams(window.location.search);
+      let id = urlParams.get("id");
+
+      // 🔁 Restore from liff.state
+      if (!id && urlParams.get("liff.state")) {
+        const restoredUrl = new URL(
+          "https://dummy.com" + decodeURIComponent(urlParams.get("liff.state"))
+        );
+        id = restoredUrl.searchParams.get("id");
+        if (id) {
+          history.replaceState(
+            {},
+            "",
+            `${location.pathname}?id=${encodeURIComponent(id)}`
+          );
+        }
+      }
+
+      async function loadNews() {
+        const response = await fetch(
+          `${sheetApiUrl}?link=${encodeURIComponent(id)}`
+        );
+        const data = await response.json();
+        document.getElementById("loadingMsg").style.display = "none";
+        if (data && data.translated) {
+          localStorage.setItem("newsData", JSON.stringify(data));
+          document.getElementById("newsContainer").style.display = "block";
+          document.getElementById("newsImage").src =
+            data.imageUrl || fallbackImage;
+          document.getElementById("newsTitle").textContent = data.title;
+          document.getElementById("newsContent").textContent = data.translated;
+          document.getElementById("newsDate").textContent = `🗓 ${data.pubDate}`;
+          document.getElementById("originalLink").href = data.link;
+        } else {
+          document.getElementById("errorMsg").textContent =
+            "❌ ไม่พบข่าวนี้ในระบบ";
+        }
+      }
+
+      function showFlexModal() {
+        const data = JSON.parse(localStorage.getItem("newsData"));
+        if (data) {
+          document.getElementById("modalTitle").textContent = data.title;
+          document.getElementById("modalContent").textContent = data.translated;
+          document.getElementById("modalLink").textContent = data.link;
+          new bootstrap.Modal(document.getElementById("shareModal")).show();
+        }
+      }
+
+      async function initLiffAndShare() {
+        await liff.init({ liffId: "1661018679-NKQMK66O" });
+        if (!liff.isLoggedIn()) {
+          localStorage.setItem("showModalAfterLogin", "1");
+          liff.login({ redirectUri: window.location.href });
+        } else {
+          if (localStorage.getItem("showModalAfterLogin") === "1") {
+            localStorage.removeItem("showModalAfterLogin");
+            showFlexModal();
+          }
+        }
+      }
+
+      document
+        .getElementById("shareBtn")
+        .addEventListener("click", async () => {
+          localStorage.setItem("showModalAfterLogin", "1");
+          await initLiffAndShare();
+        });
+
+      document
+        .getElementById("modalSendBtn")
+        .addEventListener("click", async () => {
+          const data = JSON.parse(localStorage.getItem("newsData"));
+          const flexMessage = {
+            type: "flex",
+            altText: data.title,
+            contents: {
+              type: "bubble",
+              hero: {
+                type: "image",
+                url: data.imageUrl || fallbackImage,
+                size: "full",
+                aspectRatio: "16:9",
+                aspectMode: "cover",
+              },
+              body: {
+                type: "box",
+                layout: "vertical",
+                contents: [
+                  {
+                    type: "text",
+                    text: data.title,
+                    weight: "bold",
+                    wrap: true,
+                  },
+                  {
+                    type: "text",
+                    text: data.translated,
+                    wrap: true,
+                    margin: "md",
+                  },
+                ],
+              },
+              footer: {
+                type: "box",
+                layout: "horizontal",
+                contents: [
+                  {
+                    type: "button",
+                    action: {
+                      type: "uri",
+                      label: "อ่านต้นฉบับ",
+                      uri: data.link,
+                    },
+                    style: "link",
+                  },
+                ],
+              },
+            },
+          };
+          await liff.shareTargetPicker([flexMessage]);
+        });
+
+      // 🔁 เรียกใช้ทุกครั้งโหลดหน้า
+      if (id) {
+        loadNews().then(() => {
+          initLiffAndShare();
+        });
+      } else {
+        document.getElementById("errorMsg").textContent =
+          "❗ ไม่มีพารามิเตอร์ข่าวใน URL";
+        document.getElementById("loadingMsg").style.display = "none";
+      }
+    </script>
+  </body>
+</html>
