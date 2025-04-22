@@ -2,46 +2,32 @@
 <html lang="th">
   <head>
     <meta charset="UTF-8" />
-    <title>📢 อ่านข่าวภาษาไทย</title>
+    <title>📢 แชร์ข่าวภาษาไทย</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="style-theme.css" />
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/locale/th.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/relativeTime.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
-    <style>
-      .news-image {
-        width: 100%;
-        height: auto;
-        max-height: 300px;
-        object-fit: cover;
-        border-top-left-radius: 0.5rem;
-        border-top-right-radius: 0.5rem;
-      }
-    </style>
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
   </head>
   <body>
     <div id="header-container"></div>
     <div class="container py-4">
-      <h1 class="text-success mb-4">📢 อ่านข่าวภาษาไทย</h1>
+      <h1 class="mb-4 text-success">📢 แชร์ข่าวภาษาไทย</h1>
+
       <div id="newsContainer" class="card shadow-sm" style="display: none">
-        <img id="newsImage" class="news-image" src="" alt="" />
+        <img id="newsImage" class="card-img-top" src="" alt="News Image" />
         <div class="card-body">
-          <h5 id="newsTitle" class="fw-bold text-success"></h5>
-          <p id="newsContent" class="fs-5"></p>
-          <div class="text-muted mt-4" id="newsDate"></div>
-          <div class="d-flex justify-content-between mt-3">
+          <h5 id="newsTitle" class="card-title text-success fw-bold"></h5>
+          <p id="newsContent" class="card-text"></p>
+          <p class="text-muted"><span id="newsDate"></span></p>
+          <div class="d-flex justify-content-between align-items-center">
             <a
               id="originalLink"
+              class="btn btn-outline-secondary btn-sm"
               href="#"
               target="_blank"
-              class="btn btn-outline-secondary btn-sm"
               >🔗 อ่านต้นฉบับ</a
             >
             <button id="shareBtn" class="btn btn-outline-danger btn-sm">
@@ -50,47 +36,71 @@
           </div>
         </div>
       </div>
-      <div id="errorMsg" class="text-danger fw-semibold">
-        ⌛ กำลังโหลดข่าว...
-      </div>
+
+      <div id="errorMsg" class="text-danger fw-semibold"></div>
+      <div id="loading" class="text-muted">⏳ กำลังโหลดข่าว...</div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/locale/th.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/relativeTime.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
+
     <script>
+      // LINE Login + Redirect
+      const LIFF_ID = "1661018679-NKQMK66O";
+      const sheetApiUrl =
+        "https://script.google.com/macros/s/AKfycbw7HEHW_mrgBUD-L1ogKs7r6XbbdenH6UwuS6W8XhUVeTeHci0gKW3IAOJ080YMc7PjGw/exec";
+      const fallbackImage =
+        "https://png.pngtree.com/thumb_back/fh260/background/20231108/pngtree-japanese-style-2024-year-of-the-dragon-new-year-background-image_13958021.jpg";
+
       dayjs.locale("th");
       dayjs.extend(dayjs_plugin_relativeTime);
       dayjs.extend(dayjs_plugin_utc);
       dayjs.extend(dayjs_plugin_timezone);
 
-      const sheetApiUrl =
-        "https://script.google.com/macros/s/AKfycbw7HEHW_mrgBUD-L1ogKs7r6XbbdenH6UwuS6W8XhUVeTeHci0gKW3IAOJ080YMc7PjGw/exec";
-      const fallbackImage =
-        "https://png.pngtree.com/thumb_back/fh260/background/20231108/pngtree-japanese-style-2024-year-of-the-dragon-new-year-background-image_13958021.jpg";
-      const params = new URLSearchParams(location.search);
-      const id = decodeURIComponent(params.get("id"));
-      let newsData = {};
+      const urlParams = new URLSearchParams(window.location.search);
+      const liffState = urlParams.get("liff.state");
+      let id = decodeURIComponent(urlParams.get("id") || "");
 
-      window.addEventListener("DOMContentLoaded", () => {
-        const newsData = JSON.parse(sessionStorage.getItem("newsData"));
-        const justLoggedIn = sessionStorage.getItem("justLoggedIn");
+      // กรณี redirect กลับจาก login
+      if (liffState && !id && liffState.startsWith("?id=")) {
+        const actualId = liffState.replace("?id=", "");
+        window.location.replace(`${window.location.pathname}?id=${actualId}`);
+      }
 
-        if (newsData && justLoggedIn === "true") {
-          console.log("🔁 กลับมาจาก Login และมีข่าวพร้อม แชร์แล้ว");
+      let newsData = null;
 
-          // เรียก Modal
-          const shareModal = new bootstrap.Modal(
-            document.getElementById("shareModal")
+      async function loadNews(link) {
+        try {
+          const res = await fetch(
+            `${sheetApiUrl}?link=${encodeURIComponent(link)}`
           );
-          shareModal.show();
-
-          sessionStorage.removeItem("justLoggedIn"); // เคลียร์ flag
-        }
-      });
-
-      async function initLiff() {
-        await liff.init({ liffId: "1661018679-NKQMK66O" });
-        if (!liff.isLoggedIn()) {
-          localStorage.setItem("postLoginRedirect", window.location.href);
-          liff.login({ redirectUri: window.location.href });
+          const data = await res.json();
+          if (data && data.translated) {
+            newsData = data;
+            document.getElementById("newsContainer").style.display = "block";
+            document.getElementById("newsImage").src =
+              data.imageUrl || fallbackImage;
+            document.getElementById("newsTitle").textContent = data.title;
+            document.getElementById("newsContent").textContent =
+              data.translated;
+            document.getElementById(
+              "newsDate"
+            ).textContent = `📅 ${formatSmartThaiDate(data.pubDate)}`;
+            document.getElementById("originalLink").href = data.link;
+            sessionStorage.setItem("newsData", JSON.stringify(data));
+          } else {
+            document.getElementById("errorMsg").textContent =
+              "❌ ไม่พบข่าวนี้ในระบบ";
+          }
+        } catch (err) {
+          console.error(err);
+          document.getElementById("errorMsg").textContent =
+            "⚠️ เกิดข้อผิดพลาดในการโหลดข่าว";
+        } finally {
+          document.getElementById("loading").remove();
         }
       }
 
@@ -104,97 +114,72 @@
         return date.format("D MMMM YYYY เวลา HH:mm น.");
       }
 
-      if (id) {
-        fetch(`${sheetApiUrl}?link=${encodeURIComponent(id)}`)
-          .then((res) => res.json())
-          .then((data) => {
-            if (data && data.translated) {
-              newsData = data;
-              sessionStorage.setItem("newsData", JSON.stringify(data));
+      async function initLiffShare() {
+        await liff.init({ liffId: LIFF_ID });
+        if (!liff.isLoggedIn()) {
+          liff.login({ redirectUri: window.location.href });
+        } else {
+          const stored = sessionStorage.getItem("newsData");
+          if (!stored) return alert("❗ ไม่มีข้อมูลข่าวใน sessionStorage");
 
-              document.getElementById("newsContainer").style.display = "block";
-              document.getElementById("newsImage").src =
-                data.imageUrl || fallbackImage;
-              document.getElementById("newsTitle").textContent = data.title;
-              document.getElementById("newsContent").textContent =
-                data.translated;
-              document.getElementById(
-                "newsDate"
-              ).textContent = `🗓 ${formatSmartThaiDate(data.pubDate)}`;
-              document.getElementById("originalLink").href = data.link;
-
-              document.getElementById("errorMsg").textContent = "";
-            } else {
-              document.getElementById("errorMsg").textContent =
-                "❌ ไม่พบข่าวนี้ในระบบ";
-            }
-          })
-          .catch((err) => {
-            console.error(err);
-            document.getElementById("errorMsg").textContent =
-              "⚠️ เกิดข้อผิดพลาดในการโหลดข่าว";
-          });
-      } else {
-        document.getElementById("errorMsg").textContent =
-          "❗ ไม่มีพารามิเตอร์ข่าวใน URL";
+          const d = JSON.parse(stored);
+          const flex = {
+            type: "flex",
+            altText: d.title,
+            contents: {
+              type: "bubble",
+              hero: {
+                type: "image",
+                url: d.imageUrl || fallbackImage,
+                size: "full",
+                aspectRatio: "16:9",
+                aspectMode: "cover",
+              },
+              body: {
+                type: "box",
+                layout: "vertical",
+                contents: [
+                  { type: "text", text: d.title, weight: "bold", wrap: true },
+                  {
+                    type: "text",
+                    text: d.translated,
+                    size: "sm",
+                    wrap: true,
+                    margin: "md",
+                  },
+                ],
+              },
+              footer: {
+                type: "box",
+                layout: "horizontal",
+                contents: [
+                  {
+                    type: "button",
+                    action: { type: "uri", label: "อ่านต้นฉบับ", uri: d.link },
+                    style: "link",
+                  },
+                ],
+              },
+            },
+          };
+          await liff.shareTargetPicker([flex]);
+        }
       }
 
       document
         .getElementById("shareBtn")
-        .addEventListener("click", async () => {
-          await initLiff();
-          if (liff.isApiAvailable("shareTargetPicker")) {
-            const flexMessage = {
-              type: "flex",
-              altText: newsData.title,
-              contents: {
-                type: "bubble",
-                hero: {
-                  type: "image",
-                  url: newsData.imageUrl || fallbackImage,
-                  size: "full",
-                  aspectRatio: "16:9",
-                  aspectMode: "cover",
-                },
-                body: {
-                  type: "box",
-                  layout: "vertical",
-                  contents: [
-                    {
-                      type: "text",
-                      text: newsData.title,
-                      weight: "bold",
-                      wrap: true,
-                    },
-                    {
-                      type: "text",
-                      text: newsData.translated,
-                      wrap: true,
-                      margin: "md",
-                    },
-                  ],
-                },
-                footer: {
-                  type: "box",
-                  layout: "horizontal",
-                  contents: [
-                    {
-                      type: "button",
-                      action: {
-                        type: "uri",
-                        label: "อ่านต้นฉบับ",
-                        uri: newsData.link,
-                      },
-                      style: "link",
-                    },
-                  ],
-                },
-              },
-            };
-            await liff.shareTargetPicker([flexMessage]);
-          }
-        });
+        .addEventListener("click", initLiffShare);
 
+      // main
+      if (id) {
+        loadNews(id);
+      } else {
+        document.getElementById("errorMsg").textContent =
+          "❗ ไม่มีพารามิเตอร์ข่าวใน URL";
+        document.getElementById("loading").remove();
+      }
+
+      // load header + theme
       fetch("header.html")
         .then((res) => res.text())
         .then((html) => {
