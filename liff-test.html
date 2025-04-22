@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ฉลองครบ 16 ปี วัดพระธรรมกายไซตะมะ</title>
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
-    <!-- เพิ่ม Bootstrap -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -29,29 +28,27 @@
   </head>
   <body>
     <h1>แชร์เมื่อไหร่ก็ได้บุญทุกครั้ง</h1>
-    <!-- ปุ่มที่เป็นสีเขียวและกว้างเต็มหน้าจอ -->
     <button id="shareButton" class="btn btn-success btn-full">
       กดเลือกชื่อเพื่อน หรือชื่อกลุ่ม
     </button>
 
     <script>
-      // LIFF initialization
-      function initializeLiff() {
-        liff
-          .init({ liffId: "11661018679-Y47yR00l" })
-          .then(() => {
-            if (!liff.isLoggedIn()) {
-              liff.login();
-            }
-          })
-          .catch((err) => {
-            console.error("LIFF initialization failed ", err);
-          });
+      async function initializeLiff() {
+        try {
+          await liff.init({ liffId: "1661018679-Y47yR00l" });
+          if (!liff.isLoggedIn()) {
+            liff.login();
+          }
+        } catch (error) {
+          console.error("LIFF initialization failed:", error);
+        }
       }
 
-      document
-        .getElementById("shareButton")
-        .addEventListener("click", function () {
+      document.addEventListener("DOMContentLoaded", () => {
+        initializeLiff();
+
+        const shareButton = document.getElementById("shareButton");
+        shareButton.addEventListener("click", async () => {
           if (liff.isApiAvailable("shareTargetPicker")) {
             const flexMessage = {
               type: "flex",
@@ -180,31 +177,23 @@
                       height: "md",
                       style: "primary",
                     },
-                    {
-                      type: "spacer",
-                      size: "sm",
-                    },
+                    { type: "spacer", size: "sm" },
                   ],
                 },
               },
             };
 
-            liff
-              .shareTargetPicker([flexMessage])
-              .then(() => {
-                console.log("Message shared!");
-              })
-              .catch((err) => {
-                console.error("Failed to share message ", err);
-              });
+            try {
+              await liff.shareTargetPicker([flexMessage]);
+              console.log("Message shared!");
+            } catch (error) {
+              console.error("Failed to share message:", error);
+            }
           } else {
             console.error("Share Target Picker API is not available.");
           }
         });
-
-      window.onload = () => {
-        initializeLiff();
-      };
+      });
     </script>
   </body>
 </html>
