@@ -33,23 +33,24 @@
     </button>
 
     <script>
-      async function initializeLiff() {
+      async function main() {
         try {
           await liff.init({ liffId: "1661018679-Y47yR00l" });
+
           if (!liff.isLoggedIn()) {
             liff.login();
+            return; // ให้ reload หลัง login
           }
-        } catch (error) {
-          console.error("LIFF initialization failed:", error);
-        }
-      }
 
-      document.addEventListener("DOMContentLoaded", () => {
-        initializeLiff();
+          await liff.ready; // รอให้ liff พร้อมใช้งาน
 
-        const shareButton = document.getElementById("shareButton");
-        shareButton.addEventListener("click", async () => {
-          if (liff.isApiAvailable("shareTargetPicker")) {
+          const shareButton = document.getElementById("shareButton");
+          shareButton.addEventListener("click", async () => {
+            if (!liff.isApiAvailable("shareTargetPicker")) {
+              alert("อุปกรณ์นี้ไม่รองรับการแชร์ผ่าน Share Target Picker ครับ");
+              return;
+            }
+
             const flexMessage = {
               type: "flex",
               altText:
@@ -81,7 +82,6 @@
                       size: "lg",
                       color: "#C92041FF",
                       align: "center",
-                      contents: [],
                     },
                     {
                       type: "text",
@@ -89,7 +89,6 @@
                       size: "lg",
                       color: "#C92041FF",
                       align: "center",
-                      contents: [],
                     },
                     {
                       type: "box",
@@ -108,7 +107,6 @@
                               size: "sm",
                               color: "#D4D4D4FF",
                               flex: 1,
-                              contents: [],
                             },
                             {
                               type: "text",
@@ -116,9 +114,7 @@
                               size: "sm",
                               color: "#2C54D3FF",
                               flex: 10,
-                              align: "start",
                               wrap: true,
-                              contents: [],
                             },
                           ],
                         },
@@ -133,7 +129,6 @@
                               size: "sm",
                               color: "#AAAAAA",
                               flex: 1,
-                              contents: [],
                             },
                             {
                               type: "text",
@@ -142,7 +137,6 @@
                               color: "#0E128CFF",
                               flex: 10,
                               wrap: true,
-                              contents: [],
                             },
                           ],
                         },
@@ -153,7 +147,6 @@
                 footer: {
                   type: "box",
                   layout: "vertical",
-                  flex: 0,
                   spacing: "sm",
                   contents: [
                     {
@@ -163,7 +156,6 @@
                         label: "อ่านเพิ่มเติม",
                         uri: "https://linevoom.line.me/post/1172735114495047902",
                       },
-                      height: "md",
                       style: "primary",
                     },
                     {
@@ -174,7 +166,6 @@
                         uri: "https://liff.line.me/1661018679-3gpyeQQk",
                       },
                       color: "#FF8B3DFF",
-                      height: "md",
                       style: "primary",
                     },
                     { type: "spacer", size: "sm" },
@@ -184,16 +175,22 @@
             };
 
             try {
-              await liff.shareTargetPicker([flexMessage]);
-              console.log("Message shared!");
+              const result = await liff.shareTargetPicker([flexMessage]);
+              if (result) {
+                console.log("✅ แชร์เรียบร้อยแล้ว");
+              } else {
+                console.log("❌ ผู้ใช้ยกเลิกการแชร์");
+              }
             } catch (error) {
-              console.error("Failed to share message:", error);
+              console.error("❌ แชร์ไม่สำเร็จ:", error);
             }
-          } else {
-            console.error("Share Target Picker API is not available.");
-          }
-        });
-      });
+          });
+        } catch (err) {
+          console.error("LIFF init error:", err);
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", main);
     </script>
   </body>
 </html>
