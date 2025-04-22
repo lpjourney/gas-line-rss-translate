@@ -32,25 +32,36 @@
       }
       #previewCardContainer {
         width: 100%;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
       }
       .card-img-top {
         max-height: 250px;
         object-fit: cover;
+        transition: max-height 0.3s;
       }
     </style>
   </head>
   <body>
     <div class="content-wrapper">
       <h1>แชร์เมื่อไหร่ก็ได้บุญทุกครั้ง</h1>
+
+      <!-- Card Preview -->
       <div id="previewCardContainer"></div>
+
+      <!-- Toggle Button for Full Image -->
+      <button id="toggleImageSize" class="btn btn-secondary btn-full">
+        รูปเต็มสัดส่วน
+      </button>
+
       <button id="shareButton" class="btn btn-success btn-full">
         📤 แชร์ Flex Message
       </button>
+
       <button id="testLogButton" class="btn btn-outline-primary btn-full">
         🧪 ทดสอบระบบบันทึก log (ไม่ส่ง Flex)
       </button>
     </div>
+
     <script>
       const webhookUrl =
         "https://script.google.com/macros/s/AKfycbxCkj-3cM9tSU_IWosWOlGX3FZJqojmRxz3h_hyoqCP0n62k_1_pjhr1BZwis_2zW5L/exec";
@@ -175,6 +186,7 @@
           },
         },
       };
+
       function renderPreview(msg) {
         const container = document.getElementById("previewCardContainer");
         const heroUrl = msg.contents.hero.url;
@@ -199,6 +211,7 @@
           </div>
         `;
       }
+
       async function logShareToSheet(status) {
         try {
           const profile = await liff.getProfile();
@@ -216,6 +229,7 @@
           console.error("ไม่สามารถบันทึก log:", e);
         }
       }
+
       async function main() {
         await liff.init({ liffId: "1661018679-Y47yR00l" });
         if (!liff.isLoggedIn()) {
@@ -224,6 +238,27 @@
         }
         await liff.ready;
         renderPreview(flexMessage);
+
+        // Toggle image size
+        let limited = true;
+        const toggleBtn = document.getElementById("toggleImageSize");
+        toggleBtn.addEventListener("click", () => {
+          const img = document.querySelector(
+            "#previewCardContainer .card-img-top"
+          );
+          if (!img) return;
+          limited = !limited;
+          if (limited) {
+            img.style.maxHeight = "250px";
+            img.style.objectFit = "cover";
+            toggleBtn.innerText = "รูปเต็มสัดส่วน";
+          } else {
+            img.style.maxHeight = "none";
+            img.style.objectFit = "";
+            toggleBtn.innerText = "จำกัดความสูง 250px";
+          }
+        });
+
         document.getElementById("shareButton").onclick = async () => {
           try {
             const result = await liff.shareTargetPicker([flexMessage]);
@@ -234,11 +269,13 @@
             setTimeout(() => liff.closeWindow(), 1500);
           }
         };
+
         document.getElementById("testLogButton").onclick = async () => {
           await logShareToSheet("🧪 ทดสอบการบันทึก log");
           alert("✅ ส่งข้อมูลทดสอบไปยัง Google Sheet แล้ว");
         };
       }
+
       document.addEventListener("DOMContentLoaded", main);
     </script>
   </body>
