@@ -14,11 +14,12 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        height: 100vh;
+        justify-content: flex-start;
+        min-height: 100vh;
         background-color: #f7f7f7;
         margin: 0;
         text-align: center;
+        padding-top: 20px;
       }
       .btn-full {
         width: 80%;
@@ -26,10 +27,17 @@
         font-size: 18px;
         margin-bottom: 15px;
       }
+      #previewCardContainer {
+        width: 90%;
+        margin-bottom: 20px;
+      }
     </style>
   </head>
   <body>
     <h1>แชร์เมื่อไหร่ก็ได้บุญทุกครั้ง</h1>
+
+    <!-- Card Preview -->
+    <div id="previewCardContainer"></div>
 
     <button id="shareButton" class="btn btn-success btn-full">
       📤 แชร์ Flex Message
@@ -42,6 +50,157 @@
     <script>
       const webhookUrl =
         "https://script.google.com/macros/s/AKfycbxCkj-3cM9tSU_IWosWOlGX3FZJqojmRxz3h_hyoqCP0n62k_1_pjhr1BZwis_2zW5L/exec";
+
+      // Define Flex Message JSON
+      const flexMessage = {
+        type: "flex",
+        altText: "แชร์ข่าวบุญ พิธีทอดผ้าป่าฉลองครบ 16 ปี วัดพระธรรมกายไซตะมะ",
+        contents: {
+          type: "bubble",
+          hero: {
+            type: "image",
+            url: "https://voom-obs.line-scdn.net/r/myhome/hex/cj02cG5vbWlnMzM4MTA1JnM9anA3JnQ9ZCZ1PTFlcGY5YzBkMDNpMDAmaT0w/m612x918",
+            size: "full",
+            aspectRatio: "1:1.4",
+            aspectMode: "cover",
+            backgroundColor: "#FFFFFFFF",
+            action: {
+              type: "uri",
+              label: "อ่านเพิ่มเติม",
+              uri: "https://linevoom.line.me/post/1172735114495047902",
+            },
+          },
+          body: {
+            type: "box",
+            layout: "vertical",
+            backgroundColor: "#FFFDEEFF",
+            contents: [
+              {
+                type: "text",
+                text: "พิธีทอดผ้าป่าฉลองครบ 16 ปี",
+                weight: "bold",
+                size: "lg",
+                color: "#C92041FF",
+                align: "center",
+              },
+              {
+                type: "text",
+                text: "วัดพระธรรมกายไซตะมะ",
+                size: "lg",
+                color: "#C92041FF",
+                align: "center",
+              },
+              {
+                type: "box",
+                layout: "vertical",
+                spacing: "sm",
+                margin: "lg",
+                contents: [
+                  {
+                    type: "box",
+                    layout: "baseline",
+                    spacing: "sm",
+                    contents: [
+                      {
+                        type: "text",
+                        text: "📍",
+                        size: "sm",
+                        flex: 1,
+                        color: "#888888",
+                      },
+                      {
+                        type: "text",
+                        text: "269-2 Nishimotojuku, Higashimatsuyama, Saitama",
+                        size: "sm",
+                        color: "#2C54D3FF",
+                        flex: 10,
+                        wrap: true,
+                      },
+                    ],
+                  },
+                  {
+                    type: "box",
+                    layout: "baseline",
+                    spacing: "sm",
+                    contents: [
+                      {
+                        type: "text",
+                        text: "🕥",
+                        size: "sm",
+                        flex: 1,
+                        color: "#888888",
+                      },
+                      {
+                        type: "text",
+                        text: "10:00 - 15:00",
+                        size: "sm",
+                        color: "#0E128CFF",
+                        flex: 10,
+                        wrap: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          footer: {
+            type: "box",
+            layout: "vertical",
+            spacing: "sm",
+            contents: [
+              {
+                type: "button",
+                action: {
+                  type: "uri",
+                  label: "อ่านเพิ่มเติม",
+                  uri: "https://linevoom.line.me/post/1172735114495047902",
+                },
+                style: "primary",
+              },
+              {
+                type: "button",
+                action: {
+                  type: "uri",
+                  label: "แชร์ข่าวบุญ",
+                  uri: "https://liff.line.me/1661018679-3gpyeQQk",
+                },
+                color: "#FF8B3DFF",
+                style: "primary",
+              },
+              { type: "spacer", size: "sm" },
+            ],
+          },
+        },
+      };
+
+      // Render HTML preview of JSON above buttons
+      function renderPreview(msg) {
+        const container = document.getElementById("previewCardContainer");
+        const body = msg.contents.body;
+        const title1 = body.contents[0].text;
+        const title2 = body.contents[1].text;
+        const infoItems = body.contents[2].contents
+          .map((item) => {
+            const icon = item.contents[0].text;
+            const text = item.contents[1].text;
+            return `<li class="list-group-item">${icon} ${text}</li>`;
+          })
+          .join("");
+
+        container.innerHTML = `
+          <div class="card mb-3">
+            <img src="${msg.contents.hero.url}" class="card-img-top" alt="hero" />
+            <div class="card-body">
+              <h5 class="card-title">${title1}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">${title2}</h6>
+            </div>
+            <ul class="list-group list-group-flush">
+              ${infoItems}
+            </ul>
+          </div>
+        `;
+      }
 
       async function logShareToSheet(status) {
         console.log("▶️ logShareToSheet start:", status);
@@ -85,6 +244,9 @@
 
         await liff.ready;
 
+        // Show preview on load
+        renderPreview(flexMessage);
+
         document
           .getElementById("shareButton")
           .addEventListener("click", async () => {
@@ -93,133 +255,9 @@
               return;
             }
 
-            const flexMessage = {
-              type: "flex",
-              altText:
-                "แชร์ข่าวบุญ พิธีทอดผ้าป่าฉลองครบ 16 ปี วัดพระธรรมกายไซตะมะ",
-              contents: {
-                type: "bubble",
-                hero: {
-                  type: "image",
-                  url: "https://voom-obs.line-scdn.net/r/myhome/hex/cj02cG5vbWlnMzM4MTA1JnM9anA3JnQ9ZCZ1PTFlcGY5YzBkMDNpMDAmaT0w/m612x918",
-                  size: "full",
-                  aspectRatio: "1:1.4",
-                  aspectMode: "cover",
-                  backgroundColor: "#FFFFFFFF",
-                  action: {
-                    type: "uri",
-                    label: "อ่านเพิ่มเติม",
-                    uri: "https://linevoom.line.me/post/1172735114495047902",
-                  },
-                },
-                body: {
-                  type: "box",
-                  layout: "vertical",
-                  backgroundColor: "#FFFDEEFF",
-                  contents: [
-                    {
-                      type: "text",
-                      text: "พิธีทอดผ้าป่าฉลองครบ 16 ปี",
-                      weight: "bold",
-                      size: "lg",
-                      color: "#C92041FF",
-                      align: "center",
-                    },
-                    {
-                      type: "text",
-                      text: "วัดพระธรรมกายไซตะมะ",
-                      size: "lg",
-                      color: "#C92041FF",
-                      align: "center",
-                    },
-                    {
-                      type: "box",
-                      layout: "vertical",
-                      spacing: "sm",
-                      margin: "lg",
-                      contents: [
-                        {
-                          type: "box",
-                          layout: "baseline",
-                          spacing: "sm",
-                          contents: [
-                            {
-                              type: "text",
-                              text: "📍",
-                              size: "sm",
-                              flex: 1,
-                              color: "#888888",
-                            },
-                            {
-                              type: "text",
-                              text: "269-2 Nishimotojuku, Higashimatsuyama, Saitama",
-                              size: "sm",
-                              color: "#2C54D3FF",
-                              flex: 10,
-                              wrap: true,
-                            },
-                          ],
-                        },
-                        {
-                          type: "box",
-                          layout: "baseline",
-                          spacing: "sm",
-                          contents: [
-                            {
-                              type: "text",
-                              text: "🕥",
-                              size: "sm",
-                              flex: 1,
-                              color: "#888888",
-                            },
-                            {
-                              type: "text",
-                              text: "10:00 - 15:00",
-                              size: "sm",
-                              color: "#0E128CFF",
-                              flex: 10,
-                              wrap: true,
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-                footer: {
-                  type: "box",
-                  layout: "vertical",
-                  spacing: "sm",
-                  contents: [
-                    {
-                      type: "button",
-                      action: {
-                        type: "uri",
-                        label: "อ่านเพิ่มเติม",
-                        uri: "https://linevoom.line.me/post/1172735114495047902",
-                      },
-                      style: "primary",
-                    },
-                    {
-                      type: "button",
-                      action: {
-                        type: "uri",
-                        label: "แชร์ข่าวบุญ",
-                        uri: "https://liff.line.me/1661018679-3gpyeQQk",
-                      },
-                      color: "#FF8B3DFF",
-                      style: "primary",
-                    },
-                    { type: "spacer", size: "sm" },
-                  ],
-                },
-              },
-            };
-
             try {
               const result = await liff.shareTargetPicker([flexMessage]);
               console.log("shareTargetPicker result:", result);
-              // บันทึก log เสมอ ไม่ว่าจะสำเร็จหรือไม่
               await logShareToSheet(
                 result ? "✅ แชร์สำเร็จ" : "❌ ผู้ใช้ยกเลิก"
               );
@@ -231,7 +269,6 @@
             }
           });
 
-        // ปุ่มทดสอบ log แบบไม่ต้องแชร์ Flex
         document
           .getElementById("testLogButton")
           .addEventListener("click", async () => {
