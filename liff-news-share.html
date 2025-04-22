@@ -69,6 +69,23 @@
       const id = decodeURIComponent(params.get("id"));
       let newsData = {};
 
+      window.addEventListener("DOMContentLoaded", () => {
+        const newsData = JSON.parse(sessionStorage.getItem("newsData"));
+        const justLoggedIn = sessionStorage.getItem("justLoggedIn");
+
+        if (newsData && justLoggedIn === "true") {
+          console.log("🔁 กลับมาจาก Login และมีข่าวพร้อม แชร์แล้ว");
+
+          // เรียก Modal
+          const shareModal = new bootstrap.Modal(
+            document.getElementById("shareModal")
+          );
+          shareModal.show();
+
+          sessionStorage.removeItem("justLoggedIn"); // เคลียร์ flag
+        }
+      });
+
       async function initLiff() {
         await liff.init({ liffId: "1661018679-NKQMK66O" });
         if (!liff.isLoggedIn()) {
