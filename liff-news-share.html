@@ -54,15 +54,13 @@
     </div>
 
     <script>
-      // ✅ ถอดรหัส liff.state เพื่อรีไดเร็คกลับ ?id=...
-      const query = new URLSearchParams(window.location.search);
-      const state = query.get("liff.state");
-      if (state && !query.get("id")) {
-        const cleaned = decodeURIComponent(state);
-        if (cleaned.startsWith("?id=")) {
-          const targetUrl = window.location.pathname + cleaned;
-          window.location.replace(targetUrl);
-        }
+      // 👉 ถ้ามี liff.state ที่เริ่มด้วย /liff-news-share.html ให้ redirect ไปเลย
+      const routeParams = new URLSearchParams(window.location.search);
+      const liffState = routeParams.get("liff.state");
+      if (liffState && liffState.startsWith("/liff-news-share.html")) {
+        const cleaned = decodeURIComponent(liffState);
+        const redirectUrl = cleaned.startsWith("/") ? cleaned : "/" + cleaned;
+        window.location.replace(redirectUrl);
       }
 
       dayjs.locale("th");
