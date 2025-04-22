@@ -39,6 +39,7 @@
     </style>
   </head>
   <body>
+    <div class="content-wrapper">
     <h1>แชร์เมื่อไหร่ก็ได้บุญทุกครั้ง</h1>
 
     <!-- Card Preview -->
@@ -59,12 +60,14 @@
       // Define Flex Message JSON
       const flexMessage = {
         type: "flex",
-        altText: "แชร์ข่าวบุญ พิธีทอดผ้าป่าฉลองครบ 16 ปี วัดพระธรรมกายไซตะมะ",
+        altText:
+          "แชร์ข่าวบุญ พิธีทอดผ้าป่าฉลองครบ 16 ปี วัดพระธรรมกายไซตะมะ",
         contents: {
           type: "bubble",
           hero: {
             type: "image",
-            url: "https://voom-obs.line-scdn.net/r/myhome/hex/cj02cG5vbWlnMzM4MTA1JnM9anA3JnQ9ZCZ1PTFlcGY5YzBkMDNpMDAmaT0w/m612x918",
+            url:
+              "https://voom-obs.line-scdn.net/r/myhome/hex/cj02cG5vbWlnMzM4MTA1JnM9anA3JnQ9ZCZ1PTFlcGY5YzBkMDNpMDAmaT0w/m612x918",
             size: "full",
             aspectRatio: "1:1.4",
             aspectMode: "cover",
@@ -106,16 +109,11 @@
                     layout: "baseline",
                     spacing: "sm",
                     contents: [
+                      { type: "text", text: "📍", size: "sm", flex: 1, color: "#888888" },
                       {
                         type: "text",
-                        text: "📍",
-                        size: "sm",
-                        flex: 1,
-                        color: "#888888",
-                      },
-                      {
-                        type: "text",
-                        text: "269-2 Nishimotojuku, Higashimatsuyama, Saitama",
+                        text:
+                          "269-2 Nishimotojuku, Higashimatsuyama, Saitama",
                         size: "sm",
                         color: "#2C54D3FF",
                         flex: 10,
@@ -128,13 +126,7 @@
                     layout: "baseline",
                     spacing: "sm",
                     contents: [
-                      {
-                        type: "text",
-                        text: "🕥",
-                        size: "sm",
-                        flex: 1,
-                        color: "#888888",
-                      },
+                      { type: "text", text: "🕥", size: "sm", flex: 1, color: "#888888" },
                       {
                         type: "text",
                         text: "10:00 - 15:00",
@@ -186,12 +178,12 @@
         const title1 = msg.contents.body.contents[0].text;
         const title2 = msg.contents.body.contents[1].text;
         const infoItems = msg.contents.body.contents[2].contents
-          .map((item) => {
+          .map(item => {
             const icon = item.contents[0].text;
             const text = item.contents[1].text;
             return `<li class="list-group-item">${icon} ${text}</li>`;
           })
-          .join("");
+          .join('');
 
         container.innerHTML = `
           <div class="card mb-3">
@@ -282,7 +274,13 @@
           });
       }
 
-      document.addEventListener("DOMContentLoaded", main);
+      document.addEventListener("DOMContentLoaded", () => {
+        // Ensure content ratio constraint applied
+        // Render main functionality
+        main();
+      });
+    </script>
+  </body>
     </script>
   </body>
 </html>
