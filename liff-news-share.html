@@ -54,6 +54,17 @@
     </div>
 
     <script>
+      // ✅ ถอดรหัส liff.state เพื่อรีไดเร็คกลับ ?id=...
+      const query = new URLSearchParams(window.location.search);
+      const state = query.get("liff.state");
+      if (state && !query.get("id")) {
+        const cleaned = decodeURIComponent(state);
+        if (cleaned.startsWith("?id=")) {
+          const targetUrl = window.location.pathname + cleaned;
+          window.location.replace(targetUrl);
+        }
+      }
+
       dayjs.locale("th");
       dayjs.extend(dayjs_plugin_relativeTime);
       dayjs.extend(dayjs_plugin_utc);
@@ -63,14 +74,17 @@
         "https://script.google.com/macros/s/AKfycbw7HEHW_mrgBUD-L1ogKs7r6XbbdenH6UwuS6W8XhUVeTeHci0gKW3IAOJ080YMc7PjGw/exec";
       const fallbackImage =
         "https://png.pngtree.com/thumb_back/fh260/background/20231108/pngtree-japanese-style-2024-year-of-the-dragon-new-year-background-image_13958021.jpg";
-      const params = new URLSearchParams(window.location.search);
-      const id = decodeURIComponent(params.get("id"));
+      const id = decodeURIComponent(query.get("id"));
       let data = {};
 
       async function initLiff() {
-        await liff.init({ liffId: "1661018679-NKQMK66O" });
+        await liff.init({ liffId: "1661018679-6K7wXqqk" });
         if (!liff.isLoggedIn()) {
+          console.log("🔐 ยังไม่ได้ล็อกอิน → login พร้อม redirect");
+          localStorage.setItem("postLoginRedirect", window.location.href);
           liff.login({ redirectUri: window.location.href });
+        } else {
+          console.log("✅ ล็อกอินแล้ว");
         }
       }
 
