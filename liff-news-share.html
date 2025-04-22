@@ -65,12 +65,13 @@
         "https://png.pngtree.com/thumb_back/fh260/background/20231108/pngtree-japanese-style-2024-year-of-the-dragon-new-year-background-image_13958021.jpg";
       const params = new URLSearchParams(window.location.search);
       const id = decodeURIComponent(params.get("id"));
-
       let data = {};
 
       async function initLiff() {
-        await liff.init({ liffId: "YOUR_LIFF_ID" });
-        if (!liff.isLoggedIn()) liff.login();
+        await liff.init({ liffId: "1661018679-3gpyeQQk" });
+        if (!liff.isLoggedIn()) {
+          liff.login({ redirectUri: window.location.href });
+        }
       }
 
       function formatSmartThaiDate(isoDate) {
@@ -119,18 +120,56 @@
         .addEventListener("click", async () => {
           await initLiff();
           if (liff.isApiAvailable("shareTargetPicker")) {
+            const flexMessage = {
+              type: "flex",
+              altText: data.title,
+              contents: {
+                type: "bubble",
+                hero: {
+                  type: "image",
+                  url: data.imageUrl || fallbackImage,
+                  size: "full",
+                  aspectRatio: "16:9",
+                  aspectMode: "cover",
+                },
+                body: {
+                  type: "box",
+                  layout: "vertical",
+                  contents: [
+                    {
+                      type: "text",
+                      text: data.title,
+                      weight: "bold",
+                      wrap: true,
+                    },
+                    {
+                      type: "text",
+                      text: data.translated,
+                      wrap: true,
+                      margin: "md",
+                    },
+                  ],
+                },
+                footer: {
+                  type: "box",
+                  layout: "horizontal",
+                  contents: [
+                    {
+                      type: "button",
+                      action: {
+                        type: "uri",
+                        label: "อ่านต้นฉบับ",
+                        uri: data.link,
+                      },
+                      style: "link",
+                    },
+                  ],
+                },
+              },
+            };
+
             try {
-              const template = await fetch("flex-template.json").then((res) =>
-                res.json()
-              );
-              const flex = JSON.parse(
-                JSON.stringify(template)
-                  .replaceAll("<<<imageUrl>>>", data.imageUrl || fallbackImage)
-                  .replaceAll("<<<title>>>", data.title)
-                  .replaceAll("<<<translated>>>", data.translated)
-                  .replaceAll("<<<link>>>", data.link)
-              );
-              await liff.shareTargetPicker([flex]);
+              await liff.shareTargetPicker([flexMessage]);
             } catch (err) {
               alert("เกิดข้อผิดพลาดในการแชร์: " + err.message);
             }
