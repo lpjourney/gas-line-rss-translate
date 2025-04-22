@@ -54,13 +54,14 @@
     </div>
 
     <script>
-      // 👉 ถ้ามี liff.state ที่เริ่มด้วย /liff-news-share.html ให้ redirect ไปเลย
+      // 🔁 ตรวจสอบ liff.state แล้ว redirect ซ้ำ
       const routeParams = new URLSearchParams(window.location.search);
       const liffState = routeParams.get("liff.state");
-      if (liffState && liffState.startsWith("/liff-news-share.html")) {
+      if (liffState && !routeParams.get("id")) {
         const cleaned = decodeURIComponent(liffState);
-        const redirectUrl = cleaned.startsWith("/") ? cleaned : "/" + cleaned;
-        window.location.replace(redirectUrl);
+        if (cleaned.startsWith("/liff-news-share.html")) {
+          window.location.replace(cleaned);
+        }
       }
 
       dayjs.locale("th");
@@ -72,17 +73,14 @@
         "https://script.google.com/macros/s/AKfycbw7HEHW_mrgBUD-L1ogKs7r6XbbdenH6UwuS6W8XhUVeTeHci0gKW3IAOJ080YMc7PjGw/exec";
       const fallbackImage =
         "https://png.pngtree.com/thumb_back/fh260/background/20231108/pngtree-japanese-style-2024-year-of-the-dragon-new-year-background-image_13958021.jpg";
-      const id = decodeURIComponent(query.get("id"));
+      const id = decodeURIComponent(routeParams.get("id"));
       let data = {};
 
       async function initLiff() {
-        await liff.init({ liffId: "1661018679-6K7wXqqk" });
+        await liff.init({ liffId: "1661018679-NKQMK66O" });
         if (!liff.isLoggedIn()) {
-          console.log("🔐 ยังไม่ได้ล็อกอิน → login พร้อม redirect");
           localStorage.setItem("postLoginRedirect", window.location.href);
           liff.login({ redirectUri: window.location.href });
-        } else {
-          console.log("✅ ล็อกอินแล้ว");
         }
       }
 
@@ -130,69 +128,56 @@
       document
         .getElementById("shareBtn")
         .addEventListener("click", async () => {
-          console.log("🔘 กดปุ่มแชร์แล้ว");
-          try {
-            await initLiff();
-            console.log("✅ LIFF init สำเร็จ");
-
-            if (liff.isApiAvailable("shareTargetPicker")) {
-              console.log("✅ shareTargetPicker ใช้งานได้");
-
-              const flexMessage = {
-                type: "flex",
-                altText: data.title,
-                contents: {
-                  type: "bubble",
-                  hero: {
-                    type: "image",
-                    url: data.imageUrl || fallbackImage,
-                    size: "full",
-                    aspectRatio: "16:9",
-                    aspectMode: "cover",
-                  },
-                  body: {
-                    type: "box",
-                    layout: "vertical",
-                    contents: [
-                      {
-                        type: "text",
-                        text: data.title,
-                        weight: "bold",
-                        wrap: true,
-                      },
-                      {
-                        type: "text",
-                        text: data.translated,
-                        wrap: true,
-                        margin: "md",
-                      },
-                    ],
-                  },
-                  footer: {
-                    type: "box",
-                    layout: "horizontal",
-                    contents: [
-                      {
-                        type: "button",
-                        action: {
-                          type: "uri",
-                          label: "อ่านต้นฉบับ",
-                          uri: data.link,
-                        },
-                        style: "link",
-                      },
-                    ],
-                  },
+          await initLiff();
+          if (liff.isApiAvailable("shareTargetPicker")) {
+            const flexMessage = {
+              type: "flex",
+              altText: data.title,
+              contents: {
+                type: "bubble",
+                hero: {
+                  type: "image",
+                  url: data.imageUrl || fallbackImage,
+                  size: "full",
+                  aspectRatio: "16:9",
+                  aspectMode: "cover",
                 },
-              };
-
-              await liff.shareTargetPicker([flexMessage]);
-              console.log("📤 แชร์ Flex Message สำเร็จ");
-            } else {
-              console.warn("⚠️ shareTargetPicker ไม่สามารถใช้ได้บนอุปกรณ์นี้");
-            }
-          } catch (err) {
-            console.error("❌ เกิดข้อผิดพลาด:", err);
+                body: {
+                  type: "box",
+                  layout: "vertical",
+                  contents: [
+                    {
+                      type: "text",
+                      text: data.title,
+                      weight: "bold",
+                      wrap: true,
+                    },
+                    {
+                      type: "text",
+                      text: data.translated,
+                      wrap: true,
+                      margin: "md",
+                    },
+                  ],
+                },
+                footer: {
+                  type: "box",
+                  layout: "horizontal",
+                  contents: [
+                    {
+                      type: "button",
+                      action: {
+                        type: "uri",
+                        label: "อ่านต้นฉบับ",
+                        uri: data.link,
+                      },
+                      style: "link",
+                    },
+                  ],
+                },
+              },
+            };
+            await liff.shareTargetPicker([flexMessage]);
           }
         });
 
