@@ -106,7 +106,6 @@
       const urlParams = new URLSearchParams(window.location.search);
       let id = urlParams.get("id");
 
-      // 🔁 Restore id จาก liff.state หากกลับมาจาก Login
       if (!id && urlParams.get("liff.state")) {
         const restoredUrl = new URL(
           "https://dummy.com" + decodeURIComponent(urlParams.get("liff.state"))
@@ -137,7 +136,7 @@
             document.getElementById("loadingMsg").style.display = "none";
             if (response && response.translated) {
               data = response;
-              sessionStorage.setItem("newsData", JSON.stringify(data));
+              localStorage.setItem("newsData", JSON.stringify(data));
               const imageUrl = data.imageUrl || fallbackImage;
               document.getElementById("newsContainer").style.display = "block";
               document.getElementById("newsImage").src = imageUrl;
@@ -165,34 +164,38 @@
           "❗ ไม่มีพารามิเตอร์ข่าวใน URL";
       }
 
-      async function initLiffAndShowModal() {
+      async function initLiffAndCheckModal() {
         await liff.init({ liffId: "1661018679-NKQMK66O" });
         if (!liff.isLoggedIn()) {
+          localStorage.setItem("showModalAfterLogin", "1");
           liff.login({ redirectUri: window.location.href });
         } else {
-          const saved = sessionStorage.getItem("newsData");
-          if (saved) {
-            const news = JSON.parse(saved);
-            document.getElementById("modalTitle").textContent = news.title;
-            document.getElementById("modalContent").textContent =
-              news.translated;
-            document.getElementById("modalLink").textContent = news.link;
-            document.getElementById("modalDate").textContent = news.pubDate;
-            document.getElementById("modalImage").textContent =
-              news.imageUrl || fallbackImage;
-            new bootstrap.Modal(document.getElementById("shareModal")).show();
+          if (localStorage.getItem("showModalAfterLogin") === "1") {
+            localStorage.removeItem("showModalAfterLogin");
+            const saved = localStorage.getItem("newsData");
+            if (saved) {
+              const news = JSON.parse(saved);
+              document.getElementById("modalTitle").textContent = news.title;
+              document.getElementById("modalContent").textContent =
+                news.translated;
+              document.getElementById("modalLink").textContent = news.link;
+              document.getElementById("modalDate").textContent = news.pubDate;
+              document.getElementById("modalImage").textContent =
+                news.imageUrl || fallbackImage;
+              new bootstrap.Modal(document.getElementById("shareModal")).show();
+            }
           }
         }
       }
 
       document.getElementById("shareBtn").addEventListener("click", () => {
-        initLiffAndShowModal();
+        initLiffAndCheckModal();
       });
 
       document
         .getElementById("modalSendBtn")
         .addEventListener("click", async () => {
-          const news = JSON.parse(sessionStorage.getItem("newsData"));
+          const news = JSON.parse(localStorage.getItem("newsData"));
           const flexMessage = {
             type: "flex",
             altText: news.title,
