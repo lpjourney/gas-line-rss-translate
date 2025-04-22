@@ -39,6 +39,18 @@
         object-fit: cover;
         transition: max-height 0.3s;
       }
+      .version-footer {
+        font-size: 12px;
+        color: #666;
+        margin-top: 10px;
+      }
+      .version-footer a {
+        color: #007bff;
+        text-decoration: none;
+      }
+      .version-footer a:hover {
+        text-decoration: underline;
+      }
     </style>
   </head>
   <body>
@@ -60,131 +72,22 @@
       <button id="testLogButton" class="btn btn-outline-primary btn-full">
         🧪 ทดสอบระบบบันทึก log (ไม่ส่ง Flex)
       </button>
+
+      <!-- Footer for webhook version & credit -->
+      <div id="footerVersion" class="version-footer"></div>
+      <div class="version-footer">
+        Developed by
+        <a href="https://facebook.com/niyatajayo" target="_blank"
+          >@niyatajayo</a
+        >
+      </div>
     </div>
 
     <script>
       const webhookUrl =
         "https://script.google.com/macros/s/AKfycbxCkj-3cM9tSU_IWosWOlGX3FZJqojmRxz3h_hyoqCP0n62k_1_pjhr1BZwis_2zW5L/exec";
       const flexMessage = {
-        type: "flex",
-        altText: "แชร์ข่าวบุญ พิธีทอดผ้าป่าฉลองครบ 16 ปี วัดพระธรรมกายไซตะมะ",
-        contents: {
-          type: "bubble",
-          hero: {
-            type: "image",
-            url: "https://voom-obs.line-scdn.net/r/myhome/hex/cj02cG5vbWlnMzM4MTA1JnM9anA3JnQ9ZCZ1PTFlcGY5YzBkMDNpMDAmaT0w/m612x918",
-            size: "full",
-            aspectRatio: "1:1.4",
-            aspectMode: "cover",
-            backgroundColor: "#FFFFFFFF",
-            action: {
-              type: "uri",
-              label: "อ่านเพิ่มเติม",
-              uri: "https://linevoom.line.me/post/1172735114495047902",
-            },
-          },
-          body: {
-            type: "box",
-            layout: "vertical",
-            backgroundColor: "#FFFDEEFF",
-            contents: [
-              {
-                type: "text",
-                text: "พิธีทอดผ้าป่าฉลองครบ 16 ปี",
-                weight: "bold",
-                size: "lg",
-                color: "#C92041FF",
-                align: "center",
-              },
-              {
-                type: "text",
-                text: "วัดพระธรรมกายไซตะมะ",
-                size: "lg",
-                color: "#C92041FF",
-                align: "center",
-              },
-              {
-                type: "box",
-                layout: "vertical",
-                spacing: "sm",
-                margin: "lg",
-                contents: [
-                  {
-                    type: "box",
-                    layout: "baseline",
-                    spacing: "sm",
-                    contents: [
-                      {
-                        type: "text",
-                        text: "📍",
-                        size: "sm",
-                        flex: 1,
-                        color: "#888888",
-                      },
-                      {
-                        type: "text",
-                        text: "269-2 Nishimotojuku, Higashimatsuyama, Saitama",
-                        size: "sm",
-                        color: "#2C54D3FF",
-                        flex: 10,
-                        wrap: true,
-                      },
-                    ],
-                  },
-                  {
-                    type: "box",
-                    layout: "baseline",
-                    spacing: "sm",
-                    contents: [
-                      {
-                        type: "text",
-                        text: "🕥",
-                        size: "sm",
-                        flex: 1,
-                        color: "#888888",
-                      },
-                      {
-                        type: "text",
-                        text: "10:00 - 15:00",
-                        size: "sm",
-                        color: "#0E128CFF",
-                        flex: 10,
-                        wrap: true,
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          footer: {
-            type: "box",
-            layout: "vertical",
-            spacing: "sm",
-            contents: [
-              {
-                type: "button",
-                action: {
-                  type: "uri",
-                  label: "อ่านเพิ่มเติม",
-                  uri: "https://linevoom.line.me/post/1172735114495047902",
-                },
-                style: "primary",
-              },
-              {
-                type: "button",
-                action: {
-                  type: "uri",
-                  label: "แชร์ข่าวบุญ",
-                  uri: "https://liff.line.me/1661018679-3gpyeQQk",
-                },
-                color: "#FF8B3DFF",
-                style: "primary",
-              },
-              { type: "spacer", size: "sm" },
-            ],
-          },
-        },
+        /* ... existing JSON ... */
       };
 
       function renderPreview(msg) {
@@ -195,21 +98,35 @@
         const infoItems = msg.contents.body.contents[2].contents
           .map(
             (item) =>
-              `<li class="list-group-item">${item.contents[0].text} ${item.contents[1].text}</li>`
+              `<li class=\"list-group-item\">${item.contents[0].text} ${item.contents[1].text}</li>`
           )
           .join("");
         container.innerHTML = `
-          <div class="card mb-3">
-            <img src="${heroUrl}" class="card-img-top" alt="hero" />
-            <div class="card-body">
-              <h5 class="card-title">${title1}</h5>
-              <h6 class="card-subtitle mb-2 text-muted">${title2}</h6>
+          <div class=\"card mb-3\">
+            <img src=\"${heroUrl}\" class=\"card-img-top\" alt=\"hero\" />
+            <div class=\"card-body\">
+              <h5 class=\"card-title\">${title1}</h5>
+              <h6 class=\"card-subtitle mb-2 text-muted\">${title2}</h6>
             </div>
-            <ul class="list-group list-group-flush">
+            <ul class=\"list-group list-group-flush\">
               ${infoItems}
             </ul>
           </div>
         `;
+      }
+
+      async function fetchVersion() {
+        try {
+          const res = await fetch(webhookUrl);
+          if (res.ok) {
+            const data = await res.json();
+            document.getElementById(
+              "footerVersion"
+            ).innerText = `Webhook version: ${data.version}`;
+          }
+        } catch (e) {
+          console.error("Error fetching version:", e);
+        }
       }
 
       async function logShareToSheet(status) {
@@ -237,27 +154,26 @@
           return;
         }
         await liff.ready;
+
         renderPreview(flexMessage);
+        fetchVersion();
 
         // Toggle image size
         let limited = true;
-        const toggleBtn = document.getElementById("toggleImageSize");
-        toggleBtn.addEventListener("click", () => {
-          const img = document.querySelector(
-            "#previewCardContainer .card-img-top"
-          );
-          if (!img) return;
-          limited = !limited;
-          if (limited) {
-            img.style.maxHeight = "250px";
-            img.style.objectFit = "cover";
-            toggleBtn.innerText = "รูปเต็มสัดส่วน";
-          } else {
-            img.style.maxHeight = "none";
-            img.style.objectFit = "";
-            toggleBtn.innerText = "จำกัดความสูง 250px";
-          }
-        });
+        document
+          .getElementById("toggleImageSize")
+          .addEventListener("click", () => {
+            const img = document.querySelector(
+              "#previewCardContainer .card-img-top"
+            );
+            if (!img) return;
+            limited = !limited;
+            img.style.maxHeight = limited ? "250px" : "none";
+            img.style.objectFit = limited ? "cover" : "";
+            document.getElementById("toggleImageSize").innerText = limited
+              ? "รูปเต็มสัดส่วน"
+              : "จำกัดความสูง 250px";
+          });
 
         document.getElementById("shareButton").onclick = async () => {
           try {
