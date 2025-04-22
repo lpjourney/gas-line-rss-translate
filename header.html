@@ -19,6 +19,7 @@
         >LINE Profile</a
       >
       <a class="btn btn-sm btn-outline-secondary me-2" href="#">เกี่ยวกับ</a>
+
       <select
         id="themeSwitcher"
         class="form-select form-select-sm me-3"
@@ -28,15 +29,16 @@
         <option value="dark">🌙 Dark</option>
         <option value="minimal">🧘 Minimal</option>
       </select>
+
       <div
         id="profileArea"
         class="d-flex align-items-center"
         style="display: none"
       >
         <img
-          id="pictureUrl"
+          id="profileImage"
           src=""
-          alt=""
+          alt="profile"
           class="rounded-circle me-2"
           style="width: 32px; height: 32px; object-fit: cover"
         />
@@ -48,14 +50,14 @@
 
 <script>
   const profile = JSON.parse(localStorage.getItem("lineProfile"));
-  if (profile) {
-    const img = document.getElementById("pictureUrl");
-    const name = document.getElementById("profileName");
-    const area = document.getElementById("profileArea");
-    if (img) img.src = profile.pictureUrl;
-    if (name) name.textContent = profile.displayName;
-    if (area) area.style.display = "flex";
+  if (profile && profile.pictureUrl && profile.displayName) {
+    document.getElementById("profileImage").src = profile.pictureUrl;
+    document.getElementById("profileName").textContent = profile.displayName;
+    document.getElementById("profileArea").style.display = "flex";
   } else {
-    window.location.href = "line-profile.html";
+    // 🔒 ถ้ายังไม่มี profile → ส่งไป login หน้า line-profile.html
+    if (!window.location.href.includes("line-profile.html")) {
+      window.location.href = "line-profile.html";
+    }
   }
 </script>
