@@ -31,6 +31,11 @@
         width: 90%;
         margin-bottom: 20px;
       }
+      /* ปรับขนาดรูปใน card preview ไม่ให้สูงเกิน 250px */
+      .card-img-top {
+        max-height: 250px;
+        object-fit: cover;
+      }
     </style>
   </head>
   <body>
@@ -177,10 +182,10 @@
       // Render HTML preview of JSON above buttons
       function renderPreview(msg) {
         const container = document.getElementById("previewCardContainer");
-        const body = msg.contents.body;
-        const title1 = body.contents[0].text;
-        const title2 = body.contents[1].text;
-        const infoItems = body.contents[2].contents
+        const heroUrl = msg.contents.hero.url;
+        const title1 = msg.contents.body.contents[0].text;
+        const title2 = msg.contents.body.contents[1].text;
+        const infoItems = msg.contents.body.contents[2].contents
           .map((item) => {
             const icon = item.contents[0].text;
             const text = item.contents[1].text;
@@ -190,7 +195,7 @@
 
         container.innerHTML = `
           <div class="card mb-3">
-            <img src="${msg.contents.hero.url}" class="card-img-top" alt="hero" />
+            <img src="${heroUrl}" class="card-img-top" alt="hero" />
             <div class="card-body">
               <h5 class="card-title">${title1}</h5>
               <h6 class="card-subtitle mb-2 text-muted">${title2}</h6>
