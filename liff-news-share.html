@@ -60,27 +60,36 @@
       dayjs.extend(dayjs_plugin_timezone);
 
       const sheetApiUrl =
-        "https://script.google.com/macros/s/AKfycbwvZ99tMiJmnyTrkIIXbOiCyTEZDfmXvPW19Gvo7LEXzJx1w7AOOYhvAdlcQvgTn32pPg/exec?preview=1";
+        "https://script.google.com/macros/s/AKfycbw7HEHW_mrgBUD-L1ogKs7r6XbbdenH6UwuS6W8XhUVeTeHci0gKW3IAOJ080YMc7PjGw/exec";
       const fallbackImage =
         "https://png.pngtree.com/thumb_back/fh260/background/20231108/pngtree-japanese-style-2024-year-of-the-dragon-new-year-background-image_13958021.jpg";
-
       const params = new URLSearchParams(window.location.search);
       const id = decodeURIComponent(params.get("id"));
 
-      let sharePayload = {};
+      let data = {};
 
       async function initLiff() {
-        await liff.init({ liffId: "1661018679-erv7N44z" });
+        await liff.init({ liffId: "YOUR_LIFF_ID" });
         if (!liff.isLoggedIn()) liff.login();
+      }
+
+      function formatSmartThaiDate(isoDate) {
+        const now = dayjs().tz("Asia/Bangkok");
+        const date = dayjs(isoDate).tz("Asia/Bangkok");
+        if (now.isSame(date, "day"))
+          return `วันนี้ เวลา ${date.format("HH:mm")} น.`;
+        if (now.subtract(1, "day").isSame(date, "day"))
+          return `เมื่อวาน เวลา ${date.format("HH:mm")} น.`;
+        return date.format("D MMMM YYYY เวลา HH:mm น.");
       }
 
       if (id) {
         fetch(`${sheetApiUrl}?link=${encodeURIComponent(id)}`)
           .then((res) => res.json())
-          .then((data) => {
-            if (data && data.translated) {
+          .then((response) => {
+            if (response && response.translated) {
+              data = response;
               const imageUrl = data.imageUrl || fallbackImage;
-
               document.getElementById("newsContainer").style.display = "block";
               document.getElementById("newsImage").src = imageUrl;
               document.getElementById("newsTitle").textContent = data.title;
@@ -90,60 +99,6 @@
                 "newsDate"
               ).textContent = `🗓 ${formatSmartThaiDate(data.pubDate)}`;
               document.getElementById("originalLink").href = data.link;
-
-              // เตรียมข้อมูลไว้แชร์
-              sharePayload = {
-                type: "flex",
-                altText: data.title,
-                contents: {
-                  type: "bubble",
-                  hero: {
-                    type: "image",
-                    url: imageUrl,
-                    size: "full",
-                    aspectRatio: "16:9",
-                    aspectMode: "cover",
-                  },
-                  body: {
-                    type: "box",
-                    layout: "vertical",
-                    contents: [
-                      {
-                        type: "text",
-                        text: data.title,
-                        weight: "bold",
-                        size: "md",
-                        wrap: true,
-                      },
-                      {
-                        type: "text",
-                        text: data.translated,
-                        size: "sm",
-                        wrap: true,
-                        margin: "md",
-                      },
-                    ],
-                  },
-                  footer: {
-                    type: "box",
-                    layout: "horizontal",
-                    spacing: "md",
-                    contents: [
-                      {
-                        type: "button",
-                        style: "link",
-                        height: "sm",
-                        action: {
-                          type: "uri",
-                          label: "อ่านต้นฉบับ",
-                          uri: data.link,
-                        },
-                      },
-                    ],
-                    flex: 0,
-                  },
-                },
-              };
             } else {
               document.getElementById("errorMsg").textContent =
                 "❌ ไม่พบข่าวนี้ในระบบ";
@@ -159,23 +114,23 @@
           "❗ ไม่มีพารามิเตอร์ข่าวใน URL";
       }
 
-      function formatSmartThaiDate(isoDate) {
-        const now = dayjs().tz("Asia/Bangkok");
-        const date = dayjs(isoDate).tz("Asia/Bangkok");
-        if (now.isSame(date, "day"))
-          return `วันนี้ เวลา ${date.format("HH:mm")} น.`;
-        if (now.subtract(1, "day").isSame(date, "day"))
-          return `เมื่อวาน เวลา ${date.format("HH:mm")} น.`;
-        return date.format("D MMMM YYYY เวลา HH:mm น.");
-      }
-
       document
         .getElementById("shareBtn")
         .addEventListener("click", async () => {
           await initLiff();
           if (liff.isApiAvailable("shareTargetPicker")) {
             try {
-              await liff.shareTargetPicker([sharePayload]);
+              const template = await fetch("flex-template.json").then((res) =>
+                res.json()
+              );
+              const flex = JSON.parse(
+                JSON.stringify(template)
+                  .replaceAll("<<<imageUrl>>>", data.imageUrl || fallbackImage)
+                  .replaceAll("<<<title>>>", data.title)
+                  .replaceAll("<<<translated>>>", data.translated)
+                  .replaceAll("<<<link>>>", data.link)
+              );
+              await liff.shareTargetPicker([flex]);
             } catch (err) {
               alert("เกิดข้อผิดพลาดในการแชร์: " + err.message);
             }
