@@ -30,6 +30,9 @@
     <div id="header-container"></div>
     <div class="container py-4">
       <h1 class="text-success mb-4">📢 อ่านข่าวภาษาไทย</h1>
+      <div id="loadingMsg" class="text-center text-muted">
+        ⏳ กำลังโหลดข่าว...
+      </div>
       <div id="newsContainer" class="card shadow-sm" style="display: none">
         <img id="newsImage" class="news-image" src="" alt="" />
         <div class="card-body">
@@ -50,7 +53,7 @@
           </div>
         </div>
       </div>
-      <div id="errorMsg" class="text-danger fw-semibold"></div>
+      <div id="errorMsg" class="text-danger fw-semibold mt-3"></div>
     </div>
 
     <script>
@@ -73,8 +76,10 @@
         "https://script.google.com/macros/s/AKfycbw7HEHW_mrgBUD-L1ogKs7r6XbbdenH6UwuS6W8XhUVeTeHci0gKW3IAOJ080YMc7PjGw/exec";
       const fallbackImage =
         "https://png.pngtree.com/thumb_back/fh260/background/20231108/pngtree-japanese-style-2024-year-of-the-dragon-new-year-background-image_13958021.jpg";
-      const id = decodeURIComponent(routeParams.get("id"));
+      const id = decodeURIComponent(routeParams.get("id") || "");
       let data = {};
+
+      console.log("🧪 พารามิเตอร์ id =", id);
 
       async function initLiff() {
         await liff.init({ liffId: "1661018679-NKQMK66O" });
@@ -94,10 +99,12 @@
         return date.format("D MMMM YYYY เวลา HH:mm น.");
       }
 
-      if (id) {
+      if (id && id.startsWith("http")) {
         fetch(`${sheetApiUrl}?link=${encodeURIComponent(id)}`)
           .then((res) => res.json())
           .then((response) => {
+            console.log("📦 response จาก API:", response);
+            document.getElementById("loadingMsg").style.display = "none";
             if (response && response.translated) {
               data = response;
               const imageUrl = data.imageUrl || fallbackImage;
@@ -111,16 +118,19 @@
               ).textContent = `🗓 ${formatSmartThaiDate(data.pubDate)}`;
               document.getElementById("originalLink").href = data.link;
             } else {
+              console.warn("❌ ไม่พบข่าวหรือไม่มีข้อมูล translated");
               document.getElementById("errorMsg").textContent =
                 "❌ ไม่พบข่าวนี้ในระบบ";
             }
           })
           .catch((err) => {
-            console.error(err);
+            console.error("❌ ดึงข้อมูลข่าวผิดพลาด:", err);
+            document.getElementById("loadingMsg").style.display = "none";
             document.getElementById("errorMsg").textContent =
               "⚠️ เกิดข้อผิดพลาดในการโหลดข่าว";
           });
       } else {
+        document.getElementById("loadingMsg").style.display = "none";
         document.getElementById("errorMsg").textContent =
           "❗ ไม่มีพารามิเตอร์ข่าวใน URL";
       }
