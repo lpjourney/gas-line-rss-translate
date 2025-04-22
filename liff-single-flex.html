@@ -71,22 +71,53 @@
         "https://script.google.com/macros/s/AKfycbzIeh-8ONQAbklb1yYDlOpiME28qL44LFeySxiRIrY6Py5YFEwCPeYhqYM3QujdShYbYw/exec";
       let newsData = [];
 
+      // helper ฟังก์ชันแปลงเวลา
+      function getRelativeTime(dateObj) {
+        const now = new Date();
+        const diffMs = now - dateObj;
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        if (diffHours < 1) return "วันนี้";
+        if (diffHours < 24) return `${diffHours} ชั่วโมงที่แล้ว`;
+        if (diffDays === 1) return "เมื่อวาน";
+        return `${diffDays} วันที่แล้ว`;
+      }
+
       async function fetchNews() {
         const res = await fetch(api + "?preview=1");
         newsData = await res.json();
+        const now = new Date();
+
+        // สร้าง flags สำหรับข่าวใหม่ (<24 ชม.)
+        let isNew = newsData.map((item) => {
+          const d = new Date(item.pubDate); // เปลี่ยนเป็น property วันที่จริงของคุณ
+          return now - d < 24 * 3600000;
+        });
+        // ถ้าได้ข่าวใหม่ < 3 ชิ้น ให้ทำให้ 3 ชิ้นแรกเป็นใหม่
+        if (isNew.filter((f) => f).length < 3) {
+          for (let i = 0; i < 3 && i < isNew.length; i++) isNew[i] = true;
+        }
 
         const sel = document.getElementById("newsSelect");
         newsData.forEach((item, index) => {
+          const dateObj = new Date(item.pubDate);
+          const timeLabel = getRelativeTime(dateObj);
+          const formattedDate = dateObj.toLocaleDateString("th-TH", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          });
+          const icon = isNew[index] ? "🆕" : "📄";
+
           const option = document.createElement("option");
           option.value = index;
-          option.textContent = item.translated.slice(0, 100) + "...";
+          option.textContent = `${icon} [${timeLabel}] ${formattedDate} ${item.title}`;
           sel.appendChild(option);
         });
 
         sel.onchange = function () {
           const i = parseInt(this.value);
           const item = newsData[i];
-
           document.getElementById("previewTitle").textContent = item.title;
           document.getElementById("previewContent").textContent =
             item.translated;
