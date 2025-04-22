@@ -118,63 +118,69 @@
       document
         .getElementById("shareBtn")
         .addEventListener("click", async () => {
-          await initLiff();
-          if (liff.isApiAvailable("shareTargetPicker")) {
-            const flexMessage = {
-              type: "flex",
-              altText: data.title,
-              contents: {
-                type: "bubble",
-                hero: {
-                  type: "image",
-                  url: data.imageUrl || fallbackImage,
-                  size: "full",
-                  aspectRatio: "16:9",
-                  aspectMode: "cover",
-                },
-                body: {
-                  type: "box",
-                  layout: "vertical",
-                  contents: [
-                    {
-                      type: "text",
-                      text: data.title,
-                      weight: "bold",
-                      wrap: true,
-                    },
-                    {
-                      type: "text",
-                      text: data.translated,
-                      wrap: true,
-                      margin: "md",
-                    },
-                  ],
-                },
-                footer: {
-                  type: "box",
-                  layout: "horizontal",
-                  contents: [
-                    {
-                      type: "button",
-                      action: {
-                        type: "uri",
-                        label: "อ่านต้นฉบับ",
-                        uri: data.link,
-                      },
-                      style: "link",
-                    },
-                  ],
-                },
-              },
-            };
+          console.log("🔘 กดปุ่มแชร์แล้ว");
+          try {
+            await initLiff();
+            console.log("✅ LIFF init สำเร็จ");
 
-            try {
+            if (liff.isApiAvailable("shareTargetPicker")) {
+              console.log("✅ shareTargetPicker ใช้งานได้");
+
+              const flexMessage = {
+                type: "flex",
+                altText: data.title,
+                contents: {
+                  type: "bubble",
+                  hero: {
+                    type: "image",
+                    url: data.imageUrl || fallbackImage,
+                    size: "full",
+                    aspectRatio: "16:9",
+                    aspectMode: "cover",
+                  },
+                  body: {
+                    type: "box",
+                    layout: "vertical",
+                    contents: [
+                      {
+                        type: "text",
+                        text: data.title,
+                        weight: "bold",
+                        wrap: true,
+                      },
+                      {
+                        type: "text",
+                        text: data.translated,
+                        wrap: true,
+                        margin: "md",
+                      },
+                    ],
+                  },
+                  footer: {
+                    type: "box",
+                    layout: "horizontal",
+                    contents: [
+                      {
+                        type: "button",
+                        action: {
+                          type: "uri",
+                          label: "อ่านต้นฉบับ",
+                          uri: data.link,
+                        },
+                        style: "link",
+                      },
+                    ],
+                  },
+                },
+              };
+
               await liff.shareTargetPicker([flexMessage]);
-            } catch (err) {
-              alert("เกิดข้อผิดพลาดในการแชร์: " + err.message);
+              console.log("📤 แชร์ Flex Message สำเร็จ");
+            } else {
+              console.warn("⚠️ shareTargetPicker ไม่สามารถใช้ได้บนอุปกรณ์นี้");
             }
-          } else {
-            alert("ไม่สามารถใช้ shareTargetPicker ได้บนอุปกรณ์นี้");
+          } catch (err) {
+            console.error("❌ เกิดข้อผิดพลาด:", err);
           }
         });
 
