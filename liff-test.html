@@ -33,6 +33,27 @@
     </button>
 
     <script>
+      const webhookUrl =
+        "https://script.google.com/macros/s/AKfycbxCkj-3cM9tSU_IWosWOlGX3FZJqojmRxz3h_hyoqCP0n62k_1_pjhr1BZwis_2zW5L/exec";
+
+      async function logShareToSheet(status) {
+        try {
+          const profile = await liff.getProfile();
+          await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              status: status,
+              displayName: profile.displayName,
+              userId: profile.userId,
+              pictureUrl: profile.pictureUrl,
+            }),
+          });
+        } catch (e) {
+          console.error("❌ ไม่สามารถบันทึก log:", e);
+        }
+      }
+
       async function main() {
         try {
           await liff.init({ liffId: "1661018679-Y47yR00l" });
@@ -178,15 +199,16 @@
               try {
                 const result = await liff.shareTargetPicker([flexMessage]);
                 if (result) {
-                  console.log("✅ แชร์สำเร็จแล้ว กำลังปิด LIFF...");
-                  setTimeout(() => {
-                    liff.closeWindow(); // ⏱️ รอ 1.5 วินาทีแล้วปิด
-                  }, 350);
+                  console.log("✅ แชร์สำเร็จแล้ว");
+                  await logShareToSheet("แชร์สำเร็จ");
+                  setTimeout(() => liff.closeWindow(), 300);
                 } else {
                   console.log("❌ ผู้ใช้ยกเลิกการแชร์");
+                  await logShareToSheet("ผู้ใช้ยกเลิก");
                 }
               } catch (error) {
-                console.error("❌ เกิดข้อผิดพลาดในการแชร์:", error);
+                console.error("❌ แชร์ไม่สำเร็จ:", error);
+                await logShareToSheet("เกิดข้อผิดพลาด");
               }
             });
         } catch (err) {
