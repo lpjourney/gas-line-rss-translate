@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg bg-light shadow-sm mb-4">
   <div class="container">
     <a class="navbar-brand fw-bold text-success" href="index.html">ข่าวอำเภอ</a>
-    <div class="d-flex">
+    <div class="d-flex align-items-center">
       <a class="btn btn-sm btn-outline-success me-2" href="index.html"
         >หน้าแรก</a
       >
@@ -18,13 +18,38 @@
       <a class="btn btn-sm btn-outline-secondary me-2" href="#">เกี่ยวกับ</a>
       <select
         id="themeSwitcher"
-        class="form-select form-select-sm"
+        class="form-select form-select-sm me-3"
         style="width: auto"
       >
         <option value="light" selected>🌞 Light</option>
         <option value="dark">🌙 Dark</option>
         <option value="minimal">🧘 Minimal</option>
       </select>
+      <div
+        id="profileArea"
+        class="d-flex align-items-center"
+        style="display: none"
+      >
+        <img
+          id="profileImage"
+          src=""
+          alt=""
+          class="rounded-circle me-2"
+          style="width: 32px; height: 32px; object-fit: cover"
+        />
+        <span id="profileName" class="fw-semibold text-success small"></span>
+      </div>
     </div>
   </div>
 </nav>
+
+<script>
+  const profile = JSON.parse(localStorage.getItem("lineProfile"));
+  if (profile) {
+    document.getElementById("profileImage").src = profile.pictureUrl;
+    document.getElementById("profileName").textContent = profile.displayName;
+    document.getElementById("profileArea").style.display = "flex";
+  } else {
+    window.location.href = "line-profile.html";
+  }
+</script>
