@@ -49,9 +49,12 @@
 <script>
   const profile = JSON.parse(localStorage.getItem("lineProfile"));
   if (profile) {
-    document.getElementById("profileImage").src = profile.pictureUrl;
-    document.getElementById("profileName").textContent = profile.displayName;
-    document.getElementById("profileArea").style.display = "flex";
+    const img = document.getElementById("pictureUrl");
+    const name = document.getElementById("profileName");
+    const area = document.getElementById("profileArea");
+    if (img) img.src = profile.pictureUrl;
+    if (name) name.textContent = profile.displayName;
+    if (area) area.style.display = "flex";
   } else {
     window.location.href = "line-profile.html";
   }
