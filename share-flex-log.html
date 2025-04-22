@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>แชร์ข่าวบุญผ่าน LIFF</title>
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: #f7f7f7;
+        margin: 0;
+        text-align: center;
+      }
+      .btn-full {
+        width: 80%;
+        padding: 15px;
+        font-size: 18px;
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>แชร์เมื่อไหร่ก็ได้บุญทุกครั้ง</h1>
+
+    <button id="shareButton" class="btn btn-success btn-full">
+      📤 แชร์ Flex Message
+    </button>
+
+    <button id="testLogButton" class="btn btn-outline-primary btn-full">
+      🧪 ทดสอบระบบบันทึก log (ไม่ส่ง Flex)
+    </button>
+
+    <script>
+      const webhookUrl =
+        "https://script.google.com/macros/s/AKfycbxCkj-3cM9tSU_IWosWOlGX3FZJqojmRxz3h_hyoqCP0n62k_1_pjhr1BZwis_2zW5L/exec";
+
+      async function logShareToSheet(status) {
+        try {
+          const profile = await liff.getProfile();
+          await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              status: status,
+              displayName: profile.displayName,
+              userId: profile.userId,
+              pictureUrl: profile.pictureUrl,
+            }),
+          });
+        } catch (e) {
+          console.error("❌ ไม่สามารถบันทึก log:", e);
+        }
+      }
+
+      async function main() {
+        try {
+          await liff.init({ liffId: "1661018679-Y47yR00l" });
+
+          if (!liff.isLoggedIn()) {
+            liff.login();
+            return;
+          }
+
+          await liff.ready;
+
+          document
+            .getElementById("shareButton")
+            .addEventListener("click", async () => {
+              if (!liff.isApiAvailable("shareTargetPicker")) {
+                alert("ไม่สามารถใช้การแชร์ได้บนอุปกรณ์นี้");
+                return;
+              }
+
+              const flexMessage = {
+                type: "flex",
+                altText:
+                  "แชร์ข่าวบุญ พิธีทอดผ้าป่าฉลองครบ 16 ปี วัดพระธรรมกายไซตะมะ",
+                contents: {
+                  type: "bubble",
+                  hero: {
+                    type: "image",
+                    url: "https://voom-obs.line-scdn.net/r/myhome/hex/cj02cG5vbWlnMzM4MTA1JnM9anA3JnQ9ZCZ1PTFlcGY5YzBkMDNpMDAmaT0w/m612x918",
+                    size: "full",
+                    aspectRatio: "1:1.4",
+                    aspectMode: "cover",
+                    backgroundColor: "#FFFFFFFF",
+                    action: {
+                      type: "uri",
+                      label: "อ่านเพิ่มเติม",
+                      uri: "https://linevoom.line.me/post/1172735114495047902",
+                    },
+                  },
+                  body: {
+                    type: "box",
+                    layout: "vertical",
+                    backgroundColor: "#FFFDEEFF",
+                    contents: [
+                      {
+                        type: "text",
+                        text: "พิธีทอดผ้าป่าฉลองครบ 16 ปี",
+                        weight: "bold",
+                        size: "lg",
+                        color: "#C92041FF",
+                        align: "center",
+                      },
+                      {
+                        type: "text",
+                        text: "วัดพระธรรมกายไซตะมะ",
+                        size: "lg",
+                        color: "#C92041FF",
+                        align: "center",
+                      },
+                      {
+                        type: "box",
+                        layout: "vertical",
+                        spacing: "sm",
+                        margin: "lg",
+                        contents: [
+                          {
+                            type: "box",
+                            layout: "baseline",
+                            spacing: "sm",
+                            contents: [
+                              {
+                                type: "text",
+                                text: "📍",
+                                size: "sm",
+                                flex: 1,
+                                color: "#888888",
+                              },
+                              {
+                                type: "text",
+                                text: "269-2 Nishimotojuku, Higashimatsuyama, Saitama",
+                                size: "sm",
+                                color: "#2C54D3FF",
+                                flex: 10,
+                                wrap: true,
+                              },
+                            ],
+                          },
+                          {
+                            type: "box",
+                            layout: "baseline",
+                            spacing: "sm",
+                            contents: [
+                              {
+                                type: "text",
+                                text: "🕥",
+                                size: "sm",
+                                flex: 1,
+                                color: "#888888",
+                              },
+                              {
+                                type: "text",
+                                text: "10:00 - 15:00",
+                                size: "sm",
+                                color: "#0E128CFF",
+                                flex: 10,
+                                wrap: true,
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  footer: {
+                    type: "box",
+                    layout: "vertical",
+                    spacing: "sm",
+                    contents: [
+                      {
+                        type: "button",
+                        action: {
+                          type: "uri",
+                          label: "อ่านเพิ่มเติม",
+                          uri: "https://linevoom.line.me/post/1172735114495047902",
+                        },
+                        style: "primary",
+                      },
+                      {
+                        type: "button",
+                        action: {
+                          type: "uri",
+                          label: "แชร์ข่าวบุญ",
+                          uri: "https://liff.line.me/1661018679-3gpyeQQk",
+                        },
+                        color: "#FF8B3DFF",
+                        style: "primary",
+                      },
+                      { type: "spacer", size: "sm" },
+                    ],
+                  },
+                },
+              };
+
+              try {
+                const result = await liff.shareTargetPicker([flexMessage]);
+                if (result) {
+                  console.log("✅ แชร์สำเร็จแล้ว");
+                  await logShareToSheet("✅ แชร์สำเร็จ");
+                  setTimeout(() => liff.closeWindow(), 1500);
+                } else {
+                  console.log("❌ ผู้ใช้ยกเลิก");
+                  await logShareToSheet("❌ ผู้ใช้ยกเลิก");
+                }
+              } catch (error) {
+                console.error("❌ แชร์ไม่สำเร็จ:", error);
+                await logShareToSheet("⚠️ เกิดข้อผิดพลาด");
+              }
+            });
+
+          // 🔧 ปุ่มทดสอบ log
+          document
+            .getElementById("testLogButton")
+            .addEventListener("click", async () => {
+              await logShareToSheet("🧪 ทดสอบการบันทึก log");
+              alert("✅ ส่งข้อมูลทดสอบไปยัง Google Sheet แล้ว");
+            });
+        } catch (err) {
+          console.error("เกิดข้อผิดพลาดขณะโหลด LIFF:", err);
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", main);
+    </script>
+  </body>
+</html>
