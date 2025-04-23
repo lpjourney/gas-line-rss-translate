@@ -2,26 +2,51 @@
 <html lang="th">
   <head>
     <meta charset="UTF-8" />
-    <title>ส่ง Carousel Flex พร้อมรูป</n    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <title>ส่ง Carousel Flex พร้อมรูป</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-      body { background: #f7f7f7; padding: 20px; font-family: sans-serif; }
-      .card { margin-bottom: 15px; }
-      .btn-success { width: 100%; }
-      .preview-img { max-height: 200px; object-fit: cover; }
+      body {
+        background: #f7f7f7;
+        padding: 20px;
+        font-family: sans-serif;
+      }
+      /* จำกัดความกว้างของรายการข่าวและกึ่งกลาง */
+      #newsList {
+        max-width: 1320px;
+        margin: 0 auto;
+      }
+      .card {
+        margin-bottom: 15px;
+      }
+      .btn-success {
+        width: 100%;
+      }
+      .preview-img {
+        max-height: 200px;
+        object-fit: cover;
+      }
     </style>
   </head>
   <body>
-    <!-- Header เมนู -->
+    <!-- เมนูด้านบน -->
     <div id="header-container"></div>
 
-    <h4>📢 <span class="text-primary">เลือกหลายข่าว</span> → <span class="text-success">ส่ง Flex แบบ Carousel</span></h4>
+    <h4>
+      📢 <span class="text-primary">เลือกหลายข่าว</span> →
+      <span class="text-success">ส่ง Flex แบบ Carousel</span>
+    </h4>
 
-    <!-- ปุ่มล้าง, สถานะการเลือก, pagination -->
+    <!-- แถวปุ่มล้าง เลขสถานะ และ pagination -->
     <div class="d-flex align-items-center mb-3 gap-3">
-      <button id="clearBtn" class="btn btn-outline-secondary">ล้างการเลือก</button>
+      <button id="clearBtn" class="btn btn-outline-secondary">
+        ล้างการเลือก
+      </button>
       <div id="statusCount" class="fw-bold">เลือกแล้ว 0/10 รายการ</div>
       <nav aria-label="Page navigation">
         <ul class="pagination mb-0" id="pagination"></ul>
@@ -31,11 +56,19 @@
     <!-- รายการข่าว -->
     <div id="newsList" class="row g-3"></div>
 
-    <button id="sendBtn" class="btn btn-success mt-3">🚀 ส่ง Carousel Flex</button>
+    <button id="sendBtn" class="btn btn-success mt-3">
+      🚀 ส่ง Carousel Flex
+    </button>
     <div id="result" class="mt-3 text-danger fw-bold"></div>
 
-    <!-- Modal โควต้าเต็ม -->
-    <div class="modal fade" id="quotaModal" tabindex="-1" aria-labelledby="quotaModalLabel" aria-hidden="true">
+    <!-- Modal แจ้งโควต้าเต็ม -->
+    <div
+      class="modal fade"
+      id="quotaModal"
+      tabindex="-1"
+      aria-labelledby="quotaModalLabel"
+      aria-hidden="true"
+    >
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -45,25 +78,38 @@
             คุณเลือกข่าวครบ 10 ข่าวตามโควต้าของ LINE Flex Carousel แล้ว
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">รับทราบ</button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              data-bs-dismiss="modal"
+            >
+              รับทราบ
+            </button>
           </div>
         </div>
       </div>
     </div>
 
     <script>
-      // โหลดเมนู header
-      fetch('header.html')
-        .then(r => r.text())
-        .then(html => document.getElementById('header-container').innerHTML = html)
-        .catch(e => console.error('โหลด header ผิดพลาด', e));
+      // โหลด header.html มาแสดงเมนู
+      fetch("header.html")
+        .then((r) => r.text())
+        .then(
+          (html) =>
+            (document.getElementById("header-container").innerHTML = html)
+        )
+        .catch((e) => console.error("โหลด header ผิดพลาด", e));
 
-      const DEFAULT_IMG = 'https://png.pngtree.com/thumb_back/fh260/background/20231108/pngtree-japanese-style-2024-year-of-the-dragon-new-year-background-image_13958021.jpg';
-      const API_URL = 'https://script.google.com/macros/s/AKfycbwvZ99tMiJmnyTrkIIXbOiCyTEZDfmXvPW19Gvo7LEXzJx1w7AOOYhvAdlcQvgTn32pPg/exec?preview=1';
+      const DEFAULT_IMG =
+        "https://png.pngtree.com/thumb_back/fh260/background/20231108/pngtree-japanese-style-2024-year-of-the-dragon-new-year-background-image_13958021.jpg";
+      const API_URL =
+        "https://script.google.com/macros/s/AKfycbwvZ99tMiJmnyTrkIIXbOiCyTEZDfmXvPW19Gvo7LEXzJx1w7AOOYhvAdlcQvgTn32pPg/exec?preview=1";
+
       let allNews = [];
       let currentPage = 1;
       const pageSize = 10;
 
+      // โหลดข่าวจาก API
       async function loadNews() {
         try {
           const res = await fetch(API_URL);
@@ -71,22 +117,25 @@
           renderPagination();
           renderPage(1);
         } catch (e) {
-          document.getElementById('newsList').innerHTML = '❌ โหลดข่าวผิดพลาด';
+          document.getElementById("newsList").innerHTML = "❌ โหลดข่าวผิดพลาด";
+          console.error(e);
         }
       }
 
+      // แสดงข่าวตามหน้า
       function renderPage(page) {
         currentPage = page;
         const start = (page - 1) * pageSize;
-        const pageItems = allNews.slice(start, start + pageSize);
-        const listEl = document.getElementById('newsList');
-        listEl.innerHTML = '';
+        const slice = allNews.slice(start, start + pageSize);
 
-        pageItems.forEach((n, i) => {
+        const listEl = document.getElementById("newsList");
+        listEl.innerHTML = "";
+
+        slice.forEach((n, i) => {
           const idx = start + i;
-          const img = n.image?.startsWith('http') ? n.image : DEFAULT_IMG;
-          const col = document.createElement('div');
-          col.className = 'col-12 col-md-6';
+          const img = n.image?.startsWith("http") ? n.image : DEFAULT_IMG;
+          const col = document.createElement("div");
+          col.className = "col-12 col-md-6";
           col.innerHTML = `
             <div class="card h-100">
               <div class="card-body d-flex flex-column">
@@ -96,90 +145,153 @@
                 </div>
                 <p class="mb-2 flex-grow-1">${n.translated}</p>
                 <img src="${img}" onerror="this.src='${DEFAULT_IMG}'" class="preview-img w-100 rounded mb-2" />
-                <small class="text-muted">${new Date(n.pubDate || Date.now()).toLocaleDateString()}</small>
+                <small class="text-muted">${new Date(
+                  n.pubDate || Date.now()
+                ).toLocaleDateString()}</small>
               </div>
             </div>
           `;
           listEl.appendChild(col);
         });
 
-        // ผูก listener ทุก checkbox
-        document.querySelectorAll('input[type=checkbox]').forEach(chk => chk.onchange = updateStatus);
+        // ผูก listener ให้ checkbox หลัง render
+        document
+          .querySelectorAll("input[type=checkbox]")
+          .forEach((chk) => (chk.onchange = updateStatus));
         updateStatus();
         updatePaginationUI();
       }
 
+      // สร้าง pagination
       function renderPagination() {
         const total = Math.ceil(allNews.length / pageSize);
-        const pag = document.getElementById('pagination');
-        pag.innerHTML = '';
+        const pag = document.getElementById("pagination");
+        pag.innerHTML = "";
         for (let i = 1; i <= total; i++) {
-          const li = document.createElement('li');
-          li.className = 'page-item' + (i === currentPage ? ' active' : '');
+          const li = document.createElement("li");
+          li.className = "page-item" + (i === currentPage ? " active" : "");
           li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-          li.onclick = e => { e.preventDefault(); renderPage(i); };
+          li.onclick = (e) => {
+            e.preventDefault();
+            renderPage(i);
+          };
           pag.appendChild(li);
         }
       }
 
+      // ปรับ UI pagination
       function updatePaginationUI() {
-        document.querySelectorAll('#pagination .page-item').forEach((li, idx) => {
-          li.classList.toggle('active', idx + 1 === currentPage);
-        });
+        document
+          .querySelectorAll("#pagination .page-item")
+          .forEach((li, idx) => {
+            li.classList.toggle("active", idx + 1 === currentPage);
+          });
       }
 
+      // อัปเดตสถานะการเลือก
       function updateStatus() {
-        const count = document.querySelectorAll('input[type=checkbox]:checked').length;
-        document.getElementById('statusCount').textContent = `เลือกแล้ว ${count}/10 รายการ`;
+        const count = document.querySelectorAll(
+          "input[type=checkbox]:checked"
+        ).length;
+        document.getElementById(
+          "statusCount"
+        ).textContent = `เลือกแล้ว ${count}/10 รายการ`;
         if (count >= 10) {
-          new bootstrap.Modal(document.getElementById('quotaModal')).show();
+          new bootstrap.Modal(document.getElementById("quotaModal")).show();
         }
       }
 
+      // ล้างการเลือกทั้งหมด
       function clearSelections() {
-        document.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = false);
+        document
+          .querySelectorAll("input[type=checkbox]")
+          .forEach((c) => (c.checked = false));
         updateStatus();
       }
 
+      // ส่ง Carousel Flex
       async function sendCarousel() {
-        // ตรวจว่าผู้ใช้เลือกอย่างน้อย 3 ข่าว
-        const selected = [...document.querySelectorAll('input[type=checkbox]:checked')];
-        if (selected.length < 1) {
-          return alert('กรุณาเลือกข่าวอย่างน้อย 3 ข่าวขึ้นไป');
-        }
-
+        const selected = [
+          ...document.querySelectorAll("input[type=checkbox]:checked"),
+        ];
+        if (selected.length < 1)
+          return alert("กรุณาเลือกข่าวอย่างน้อย 3 ข่าวขึ้นไป");
         try {
-          await liff.init({ liffId: '1661018679-erv7N44z' });
-          if (!liff.isInClient()) throw new Error('❌ ต้องเปิดในแอป LINE');
+          await liff.init({ liffId: "1661018679-erv7N44z" });
+          if (!liff.isInClient()) throw new Error("❌ ต้องเปิดในแอป LINE");
 
-          const bubbles = selected.slice(0, 10).map(c => {
+          const bubbles = selected.slice(0, 10).map((c) => {
             const item = allNews[c.dataset.index];
-            const img = item.image?.startsWith('http') ? item.image : DEFAULT_IMG;
+            const img = item.image?.startsWith("http")
+              ? item.image
+              : DEFAULT_IMG;
             return {
-              type: 'bubble',
-              hero: { type: 'image', url: img, size: 'full', aspectRatio: '16:9', aspectMode: 'cover' },
-              body: { type: 'box', layout: 'vertical', contents: [
-                { type: 'text', text: item.title, weight: 'bold', wrap: true },
-                { type: 'text', text: item.translated.slice(0,450), size: 'sm', wrap: true }
-              ]},
-              footer: { type: 'box', layout: 'horizontal', contents: [
-                { style:'primary', type:'button', action:{ type:'uri', label:'📖 อ่าน', uri:'https://news.watsaitama.com/liff-news.html?id='+encodeURIComponent(item.link) }}
-              ]}
+              type: "bubble",
+              hero: {
+                type: "image",
+                url: img,
+                size: "full",
+                aspectRatio: "16:9",
+                aspectMode: "cover",
+              },
+              body: {
+                type: "box",
+                layout: "vertical",
+                contents: [
+                  {
+                    type: "text",
+                    text: item.title,
+                    weight: "bold",
+                    wrap: true,
+                  },
+                  {
+                    type: "text",
+                    text: item.translated.slice(0, 450),
+                    size: "sm",
+                    wrap: true,
+                  },
+                ],
+              },
+              footer: {
+                type: "box",
+                layout: "horizontal",
+                contents: [
+                  {
+                    style: "primary",
+                    type: "button",
+                    action: {
+                      type: "uri",
+                      label: "📖 อ่าน",
+                      uri:
+                        "https://news.watsaitama.com/liff-news.html?id=" +
+                        encodeURIComponent(item.link),
+                    },
+                  },
+                ],
+              },
             };
           });
 
-          await liff.sendMessages([{ type:'flex', altText:'📢 ข่าวใหม่ล่าสุด', contents:{ type:'carousel', contents:bubbles }}]);
-          document.getElementById('result').textContent = '✅ ส่งสำเร็จแล้ว';
+          await liff.sendMessages([
+            {
+              type: "flex",
+              altText: "📢 ข่าวใหม่ล่าสุด",
+              contents: { type: "carousel", contents: bubbles },
+            },
+          ]);
+          document.getElementById("result").textContent = "✅ ส่งสำเร็จแล้ว";
           liff.closeWindow();
         } catch (e) {
-          document.getElementById('result').textContent = '❌ ส่งไม่สำเร็จ: ' + e.message;
+          document.getElementById("result").textContent =
+            "❌ ส่งไม่สำเร็จ: " + e.message;
         }
       }
 
-      // ผูก event
-      document.getElementById('clearBtn').onclick = clearSelections;
-      document.getElementById('sendBtn').onclick = sendCarousel;
+      // ผูก event listeners
+      document.getElementById("clearBtn").onclick = clearSelections;
+      document.getElementById("sendBtn").onclick = sendCarousel;
 
+      // เริ่มโหลดข่าว
       loadNews();
     </script>
   </body>
