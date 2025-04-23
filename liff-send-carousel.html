@@ -61,7 +61,7 @@
     </button>
     <div id="result" class="mt-3 text-danger fw-bold"></div>
 
-    <!-- Modal แจ้งโควต้าเต็ม -->
+    <!-- Modal แจ้งโควต้าครบ -->
     <div
       class="modal fade"
       id="quotaModal"
@@ -91,25 +91,24 @@
     </div>
 
     <script>
-      // โหลด header.html มาแสดงเมนู
+      // โหลดเมนูด้านบน
       fetch("header.html")
-        .then((r) => r.text())
+        .then((response) => response.text())
         .then(
           (html) =>
             (document.getElementById("header-container").innerHTML = html)
         )
-        .catch((e) => console.error("โหลด header ผิดพลาด", e));
+        .catch((error) => console.error("โหลด header ผิดพลาด:", error));
 
       const DEFAULT_IMG =
         "https://png.pngtree.com/thumb_back/fh260/background/20231108/pngtree-japanese-style-2024-year-of-the-dragon-new-year-background-image_13958021.jpg";
       const API_URL =
         "https://script.google.com/macros/s/AKfycbwvZ99tMiJmnyTrkIIXbOiCyTEZDfmXvPW19Gvo7LEXzJx1w7AOOYhvAdlcQvgTn32pPg/exec?preview=1";
-
       let allNews = [];
       let currentPage = 1;
       const pageSize = 10;
 
-      // โหลดข่าวจาก API
+      // ดึงข่าวจาก API
       async function loadNews() {
         try {
           const res = await fetch(API_URL);
@@ -122,18 +121,19 @@
         }
       }
 
-      // แสดงข่าวตามหน้า
+      // แสดงข่าวแต่ละหน้า
       function renderPage(page) {
         currentPage = page;
         const start = (page - 1) * pageSize;
         const slice = allNews.slice(start, start + pageSize);
-
         const listEl = document.getElementById("newsList");
         listEl.innerHTML = "";
 
-        slice.forEach((n, i) => {
+        slice.forEach((news, i) => {
           const idx = start + i;
-          const img = n.image?.startsWith("http") ? n.image : DEFAULT_IMG;
+          const imgUrl = news.image?.startsWith("http")
+            ? news.image
+            : DEFAULT_IMG;
           const col = document.createElement("div");
           col.className = "col-12 col-md-6";
           col.innerHTML = `
@@ -141,12 +141,12 @@
               <div class="card-body d-flex flex-column">
                 <div class="mb-2">
                   <input type="checkbox" class="form-check-input me-2" data-index="${idx}">
-                  <strong>${n.title}</strong>
+                  <strong>${news.title}</strong>
                 </div>
-                <p class="mb-2 flex-grow-1">${n.translated}</p>
-                <img src="${img}" onerror="this.src='${DEFAULT_IMG}'" class="preview-img w-100 rounded mb-2" />
+                <p class="mb-2 flex-grow-1">${news.translated}</p>
+                <img src="${imgUrl}" onerror="this.src='${DEFAULT_IMG}'" class="preview-img w-100 rounded mb-2" />
                 <small class="text-muted">${new Date(
-                  n.pubDate || Date.now()
+                  news.pubDate || Date.now()
                 ).toLocaleDateString()}</small>
               </div>
             </div>
@@ -154,32 +154,32 @@
           listEl.appendChild(col);
         });
 
-        // ผูก listener ให้ checkbox หลัง render
+        // ผูก listener ให้ checkbox ทุกตัว
         document
           .querySelectorAll("input[type=checkbox]")
-          .forEach((chk) => (chk.onchange = updateStatus));
+          .forEach((cb) => (cb.onchange = updateStatus));
         updateStatus();
         updatePaginationUI();
       }
 
       // สร้าง pagination
       function renderPagination() {
-        const total = Math.ceil(allNews.length / pageSize);
-        const pag = document.getElementById("pagination");
-        pag.innerHTML = "";
-        for (let i = 1; i <= total; i++) {
+        const totalPages = Math.ceil(allNews.length / pageSize);
+        const pagEl = document.getElementById("pagination");
+        pagEl.innerHTML = "";
+        for (let p = 1; p <= totalPages; p++) {
           const li = document.createElement("li");
-          li.className = "page-item" + (i === currentPage ? " active" : "");
-          li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+          li.className = "page-item" + (p === currentPage ? " active" : "");
+          li.innerHTML = `<a class="page-link" href="#">${p}</a>`;
           li.onclick = (e) => {
             e.preventDefault();
-            renderPage(i);
+            renderPage(p);
           };
-          pag.appendChild(li);
+          pagEl.appendChild(li);
         }
       }
 
-      // ปรับ UI pagination
+      // อัปเดต UI ของ pagination
       function updatePaginationUI() {
         document
           .querySelectorAll("#pagination .page-item")
@@ -205,7 +205,7 @@
       function clearSelections() {
         document
           .querySelectorAll("input[type=checkbox]")
-          .forEach((c) => (c.checked = false));
+          .forEach((cb) => (cb.checked = false));
         updateStatus();
       }
 
@@ -214,22 +214,22 @@
         const selected = [
           ...document.querySelectorAll("input[type=checkbox]:checked"),
         ];
-        if (selected.length < 1)
+        if (selected.length < 1) {
           return alert("กรุณาเลือกข่าวอย่างน้อย 3 ข่าวขึ้นไป");
+        }
         try {
           await liff.init({ liffId: "1661018679-erv7N44z" });
           if (!liff.isInClient()) throw new Error("❌ ต้องเปิดในแอป LINE");
-
-          const bubbles = selected.slice(0, 10).map((c) => {
-            const item = allNews[c.dataset.index];
-            const img = item.image?.startsWith("http")
+          const bubbles = selected.slice(0, 10).map((cb) => {
+            const item = allNews[cb.dataset.index];
+            const imgUrl = item.image?.startsWith("http")
               ? item.image
               : DEFAULT_IMG;
             return {
               type: "bubble",
               hero: {
                 type: "image",
-                url: img,
+                url: imgUrl,
                 size: "full",
                 aspectRatio: "16:9",
                 aspectMode: "cover",
@@ -271,7 +271,6 @@
               },
             };
           });
-
           await liff.sendMessages([
             {
               type: "flex",
@@ -281,13 +280,13 @@
           ]);
           document.getElementById("result").textContent = "✅ ส่งสำเร็จแล้ว";
           liff.closeWindow();
-        } catch (e) {
+        } catch (err) {
           document.getElementById("result").textContent =
-            "❌ ส่งไม่สำเร็จ: " + e.message;
+            "❌ ส่งไม่สำเร็จ: " + err.message;
         }
       }
 
-      // ผูก event listeners
+      // ผูก event
       document.getElementById("clearBtn").onclick = clearSelections;
       document.getElementById("sendBtn").onclick = sendCarousel;
 
